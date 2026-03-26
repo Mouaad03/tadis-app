@@ -83,7 +83,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
       const startD = getStartDate()
-      const { data: existing } = await supabase.from('reports')
+      const { data: existing } = await supabase.from('weekly_reports')
         .select('*').eq('user_id', userId).eq('period', period)
         .eq('period', period).order('created_at', { ascending: false }).limit(1).maybeSingle()
       if (existing && existing.report && existing.report.length > 20 && existing.stats?.trades > 0) {
@@ -115,7 +115,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
             const { createClient } = await import('@/lib/supabase')
             const supabase = createClient()
             const now = new Date()
-            await supabase.from('reports').insert({
+            await supabase.from('weekly_reports').insert({
               user_id: userId, period, report: data.report, stats: data.stats,
               period_start: getStartDate(), period_end: now.toISOString().split('T')[0], lang: currentLang
             })
@@ -141,7 +141,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
     try {
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
-      const { data } = await supabase.from('reports')
+      const { data } = await supabase.from('weekly_reports')
         .select('*').eq('user_id', userId).eq('period', period)
         .order('created_at', { ascending: false }).limit(10)
       setHistory(data || [])
@@ -375,7 +375,7 @@ function AutoHistory({ userId, period, onSelect }: any) {
       if (!userId) return
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
-      const { data } = await supabase.from('reports').select('*').eq('user_id', userId).eq('period', period).order('created_at', { ascending: false }).limit(5)
+      const { data } = await supabase.from('weekly_reports').select('*').eq('user_id', userId).eq('period', period).order('created_at', { ascending: false }).limit(5)
       setHistory(data || [])
       setLoading(false)
     }
