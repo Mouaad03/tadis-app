@@ -5,17 +5,38 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContai
 
 interface Props { userId?: string; profile?: any; demoTrades?: any[] }
 
+const LABELS: Record<string, any> = {
+  en: { weekly: 'Weekly', monthly: 'Monthly', history: 'Report History', noReports: 'No reports yet — reports are generated every Sunday automatically.', back: '← Back to list', generating: 'Generating report...', winRate: 'Win Rate', netPnL: 'Net P&L', discipline: 'Discipline', trades: 'Trades', strengths: 'STRENGTHS', weaknesses: 'AREAS FOR IMPROVEMENT', action: 'ACTION PLAN', coachReport: 'AI COACHING REPORT', behaviorFlags: 'BEHAVIOR FLAGS', revenge: 'Revenge Trades', stratBreaks: 'Strategy Breaks', clean: 'Clean Trades', generate: 'Generate Report', cumPnL: 'CUMULATIVE P&L', pnlTrade: 'P&L PER TRADE', discTrade: 'DISCIPLINE PER TRADE', winPair: 'WIN RATE BY PAIR' },
+  fr: { weekly: 'Hebdo', monthly: 'Mensuel', history: 'Historique des rapports', noReports: 'Aucun rapport — les rapports sont générés chaque dimanche automatiquement.', back: '← Retour', generating: 'Génération en cours...', winRate: 'Win Rate', netPnL: 'PnL Net', discipline: 'Discipline', trades: 'Trades', generate: 'Générer le rapport', cumPnL: 'P&L CUMULATIF', pnlTrade: 'P&L PAR TRADE', discTrade: 'DISCIPLINE PAR TRADE', winPair: 'WIN RATE PAR PAIRE', behaviorFlags: 'COMPORTEMENT', revenge: 'Revenge Trades', stratBreaks: 'Ruptures stratégie', clean: 'Trades propres', coachReport: 'RAPPORT IA' },
+  ar: { weekly: 'أسبوعي', monthly: 'شهري', history: 'سجل التقارير', noReports: 'لا توجد تقارير — يتم إنشاؤها كل أحد تلقائياً.', back: '→ رجوع', generating: 'جارٍ الإنشاء...', winRate: 'نسبة الربح', netPnL: 'الربح الصافي', discipline: 'الانضباط', trades: 'الصفقات', generate: 'إنشاء تقرير', cumPnL: 'الربح التراكمي', pnlTrade: 'الربح لكل صفقة', discTrade: 'الانضباط لكل صفقة', winPair: 'نسبة الربح للزوج', behaviorFlags: 'السلوك', revenge: 'صفقات الانتقام', stratBreaks: 'كسر الاستراتيجية', clean: 'صفقات نظيفة', coachReport: 'تقرير الذكاء الاصطناعي' },
+  es: { weekly: 'Semanal', monthly: 'Mensual', history: 'Historial de informes', noReports: 'Sin informes — se generan cada domingo automáticamente.', back: '← Volver', generating: 'Generando...', winRate: 'Tasa de éxito', netPnL: 'PnL Neto', discipline: 'Disciplina', trades: 'Operaciones', generate: 'Generar informe', cumPnL: 'P&L ACUMULADO', pnlTrade: 'P&L POR OPERACIÓN', discTrade: 'DISCIPLINA POR OPERACIÓN', winPair: 'WIN RATE POR PAR', behaviorFlags: 'COMPORTAMIENTO', revenge: 'Operaciones vengativas', stratBreaks: 'Rupturas estrategia', clean: 'Operaciones limpias', coachReport: 'INFORME IA' },
+}
+
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{ background: '#0d0d18', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px' }}>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>{label}</div>
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{ fontSize: 12, fontFamily: 'JetBrains Mono', color: p.value >= 0 ? '#00cc77' : '#ff4466' }}>
+          {p.name}: {typeof p.value === 'number' ? (p.value >= 0 ? '+' : '') + p.value.toFixed(2) : p.value}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly')
-  const [report, setReport] = useState('')
-  const [stats, setStats] = useState<any>(null)
+  const [reports, setReports] = useState<any[]>([])
+  const [selected, setSelected] = useState<any>(null)
   const [trades, setTrades] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [loaded, setLoaded] = useState(false)
-  const [savedAt, setSavedAt] = useState('')
-  const [history, setHistory] = useState<any[]>([])
-  const [showHistory, setShowHistory] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const [lang, setLang] = useState('en')
+
+  const l = LABELS[lang] || LABELS.en
+  const isRTL = lang === 'ar'
 
   useEffect(() => {
     setLang(getLang())
@@ -24,383 +45,282 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
     return () => window.removeEventListener('storage', onS)
   }, [])
 
-  // Auto-load report when period or userId changes
   useEffect(() => {
-    setReport(''); setStats(null); setLoaded(false); setSavedAt(''); setTrades([])
-    setShowHistory(false)
-    if (userId) {
-      // Monthly always shows list first
-      if (period === 'monthly') return
-      // Check session cache first
-      const startD = (() => { const s = new Date(); s.setDate(s.getDate()-s.getDay()); return s.toISOString().split('T')[0] })()
-      const cacheKey = 'tradis_report_' + userId + '_' + period + '_' + startD
-      const cached = sessionStorage.getItem(cacheKey)
-      if (cached) {
-        try {
-          const p = JSON.parse(cached)
-          if (p.report && p.report.length > 20 && p.stats?.trades > 0) {
-            setReport(p.report); setStats(p.stats); setLoaded(true); setSavedAt(p.savedAt)
-            loadPeriodTrades().then(t => setTrades(t))
-            return
-          }
-        } catch(e) {}
-      }
-      autoLoadReport()
-    }
+    setSelected(null)
+    setReports([])
+    loadReports()
   }, [period, userId])
 
-  const card: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)',
-    borderRadius: 12, padding: 16, marginBottom: 14
-  }
-
-  function getStartDate() {
-    const now = new Date()
-    if (period === 'monthly') {
-      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`
+  async function loadReports() {
+    setLoading(true)
+    if (demoTrades) {
+      // Demo mode — fake reports
+      setReports([
+        { id: '1', period_start: '2026-03-16', period_end: '2026-03-22', stats: { winRate: 72, totalPnL: 1850, trades: 11, disciplineScore: 85, revengeCount: 1, stratBreaks: 0 }, report: '## ✅ PERFORMANCE SUMMARY\n\nExcellent week with 72% win rate and $1,850 profit. Strong discipline maintained throughout most sessions.\n\n## ⚠️ AREAS FOR IMPROVEMENT\n\n**Revenge Trading:** 1 revenge trade detected on Wednesday — cost you $95.\n**Session Management:** Avoid trading during low-volatility London open.\n\n## 🎯 ACTION PLAN\n\n1. Apply 30-min cooldown after every loss — no exceptions.\n2. Focus on NY session entries only for EURUSD.\n3. Review XAUUSD setups — your best performing pair this week.', created_at: new Date().toISOString(), lang: 'en' },
+        { id: '2', period_start: '2026-03-09', period_end: '2026-03-15', stats: { winRate: 58, totalPnL: 620, trades: 8, disciplineScore: 70, revengeCount: 2, stratBreaks: 1 }, report: '## ✅ PERFORMANCE SUMMARY\n\nDecent week but room for improvement. 58% win rate with $620 profit.\n\n## ⚠️ AREAS FOR IMPROVEMENT\n\n**Emotional Control:** 2 revenge trades cost you $190.\n**Strategy Discipline:** 1 strategy break on Friday.\n\n## 🎯 ACTION PLAN\n\n1. No trading after 2 consecutive losses.\n2. Review your entry criteria before each trade.\n3. Journal every trade with screenshots.', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), lang: 'en' },
+      ])
+      setLoading(false)
+      return
     }
-    const sunday = new Date()
-    sunday.setDate(sunday.getDate() - sunday.getDay())
-    sunday.setHours(0,0,0,0)
-    return sunday.toISOString().split('T')[0]
-  }
-
-  async function loadPeriodTrades() {
-    if (!userId) return []
+    if (!userId) { setLoading(false); return }
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
-    const { data } = await supabase.from('trades').select('*')
-      .eq('user_id', userId).gte('date', getStartDate())
-      .order('date', { ascending: true })
-    return data || []
-  }
-
-  async function autoLoadReport() {
-    if (!userId) return
-    // Check DB first
-    try {
-      const { createClient } = await import('@/lib/supabase')
-      const supabase = createClient()
-      const startD = getStartDate()
-      const { data: existing } = await supabase.from('weekly_reports')
-        .select('*').eq('user_id', userId).eq('period', period)
-        .eq('period', period).order('created_at', { ascending: false }).limit(1).maybeSingle()
-      if (existing && existing.report && existing.report.length > 20 && existing.stats?.trades > 0) {
-        setReport(existing.report); setStats(existing.stats); setLoaded(true); setSavedAt(existing.created_at)
-        const t = await loadPeriodTrades(); setTrades(t)
-        // Save to session cache
-        const ck = 'tradis_report_' + userId + '_' + period + '_' + (period === 'monthly' ? new Date().getFullYear() + '-' + String(new Date().getMonth()+1).padStart(2,'0') : getStartDate())
-        sessionStorage.setItem(ck, JSON.stringify({ report: existing.report, stats: existing.stats, savedAt: existing.created_at }))
-        return
-      }
-    } catch(e) { console.error(e) }
-    setLoading(true)
-    try {
-      const currentLang = getLang()
-      const url = `/api/weekly-report?userId=${userId}&period=${period}&lang=${currentLang}&forceNew=false`
-      const res = await fetch(url)
-      const data = await res.json()
-      if (data.error) { setLoading(false); return }
-      if (data.report && data.stats?.trades > 0) {
-        setReport(data.report)
-        setStats(data.stats || null)
-        setSavedAt(data.savedAt || '')
-        setLoaded(true)
-        const periodTrades = await loadPeriodTrades()
-        setTrades(periodTrades)
-        // Save + notify only if new report
-        if (!data.fromCache) {
-          try {
-            const { createClient } = await import('@/lib/supabase')
-            const supabase = createClient()
-            const now = new Date()
-            await supabase.from('weekly_reports').insert({
-              user_id: userId, period, report: data.report, stats: data.stats,
-              period_start: getStartDate(), period_end: now.toISOString().split('T')[0], lang: currentLang
-            })
-            // Notification
-            const { notify } = await import('@/components/ui/NotificationSystem')
-            notify({
-              type: 'success',
-              title: period === 'weekly' ? '📊 Weekly Report Ready!' : '📅 Monthly Report Ready!',
-              message: period === 'weekly'
-                ? 'Weekly report dyalek dyal had l-isbu3 kayn — check it out!'
-                : 'Monthly report dyalek dyal had sh-shhar kayn — check it out!',
-              duration: 8000
-            })
-          } catch(e) { console.error('Save error:', e) }
-        }
-      }
-    } catch(e) { console.error('Auto-load error:', e) }
+    const { data } = await supabase
+      .from('weekly_reports')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('period_type', period)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    setReports(data || [])
     setLoading(false)
   }
 
-  async function loadHistory() {
+  async function loadTrades(periodStart: string, periodEnd: string) {
     if (!userId) return
+    const { createClient } = await import('@/lib/supabase')
+    const supabase = createClient()
+    const { data } = await supabase.from('trades').select('*')
+      .eq('user_id', userId).gte('date', periodStart).lte('date', periodEnd)
+      .order('date', { ascending: true })
+    setTrades(data || [])
+  }
+
+  async function handleSelect(r: any) {
+    setSelected(r)
+    if (!demoTrades) await loadTrades(r.period_start, r.period_end)
+    else setTrades(demoTrades)
+  }
+
+  async function generateReport() {
+    if (!userId) return
+    setGenerating(true)
     try {
-      const { createClient } = await import('@/lib/supabase')
-      const supabase = createClient()
-      const { data } = await supabase.from('weekly_reports')
-        .select('*').eq('user_id', userId).eq('period', period)
-        .order('created_at', { ascending: false }).limit(10)
-      setHistory(data || [])
-      setShowHistory(true)
+      const res = await fetch('/api/weekly-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ period }) })
+      const data = await res.json()
+      if (data.report) {
+        await loadReports()
+      }
     } catch(e) { console.error(e) }
+    setGenerating(false)
   }
 
-  // Chart data
-  const pnlChartData = trades.map((t, i) => ({
-    name: `${t.pair}`,
-    pnl: t.pnl || 0,
-    cumPnL: trades.slice(0, i+1).reduce((s, x) => s + (x.pnl || 0), 0),
-  }))
+  const card: React.CSSProperties = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 14 }
 
-  const disciplineData = trades.map(t => ({
-    name: t.pair,
-    score: t.is_revenge ? 40 : t.is_strategy_break ? 60 : 100,
-  }))
+  // Charts data
+  const tradesForChart = demoTrades || trades
+  let cum = 0
+  const pnlChartData = tradesForChart.map((t, i) => {
+    cum += t.pnl || 0
+    return { name: t.pair || `T${i+1}`, pnl: t.pnl || 0, cumPnL: parseFloat(cum.toFixed(2)) }
+  })
+  const disciplineData = tradesForChart.map((t, i) => ({ name: t.pair || `T${i+1}`, score: t.discipline_score || (t.is_revenge ? 60 : 100) }))
+  const pairMap: Record<string, { wins: number; total: number }> = {}
+  tradesForChart.forEach(t => {
+    if (!pairMap[t.pair]) pairMap[t.pair] = { wins: 0, total: 0 }
+    pairMap[t.pair].total++
+    if (t.result === 'win') pairMap[t.pair].wins++
+  })
+  const pairData = Object.entries(pairMap).map(([pair, d]) => ({ pair, wr: Math.round((d.wins / d.total) * 100) }))
 
-  const pairData = Object.entries(
-    trades.reduce((acc: any, t) => {
-      if (!acc[t.pair]) acc[t.pair] = { wins: 0, total: 0 }
-      acc[t.pair].total++
-      if (t.result === 'win') acc[t.pair].wins++
-      return acc
-    }, {})
-  ).map(([pair, s]: any) => ({ pair, wr: Math.round(s.wins/s.total*100) }))
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload?.length) return null
-    return (
-      <div style={{ background: '#0d0d18', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', fontFamily: 'JetBrains Mono', fontSize: 11 }}>
-        <div style={{ color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>{label}</div>
-        {payload.map((p: any, i: number) => (
-          <div key={i} style={{ color: p.value >= 0 ? '#00cc77' : '#ff4466', fontWeight: 700 }}>
-            {p.name}: {p.value > 0 ? '+' : ''}{typeof p.value === 'number' ? p.value.toFixed(2) : p.value}
-          </div>
-        ))}
-      </div>
-    )
+  // Format report text with markdown-like styling
+  function formatReport(text: string) {
+    return text.split('\n').map((line, i) => {
+      if (line.startsWith('## ')) return <div key={i} style={{ fontSize: 13, fontWeight: 800, color: '#00cc77', marginTop: 16, marginBottom: 8, letterSpacing: 0.5 }}>{line.replace('## ', '')}</div>
+      if (line.startsWith('**') && line.endsWith('**')) return <div key={i} style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{line.replace(/\*\*/g, '')}</div>
+      if (line.match(/^\d+\./)) return <div key={i} style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 6, paddingLeft: 8 }}>{line}</div>
+      if (line.startsWith('**')) {
+        const parts = line.split('**')
+        return <div key={i} style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 6, lineHeight: 1.7 }}>
+          {parts.map((p, j) => j % 2 === 1 ? <strong key={j} style={{ color: '#fff' }}>{p}</strong> : p)}
+        </div>
+      }
+      return line ? <div key={i} style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 6, lineHeight: 1.7 }}>{line}</div> : <div key={i} style={{ height: 4 }} />
+    })
   }
-
-  const periodLabel = period === 'weekly' ? 'Week' : 'Month'
 
   return (
-    <div style={{ fontFamily: 'Syne, sans-serif' }}>
-
-      {/* Tabs + History */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 4 }}>
-          {(['weekly', 'monthly'] as const).map(p => (
-            <button key={p} onClick={() => setPeriod(p)}
-              style={{ padding: '8px 28px', background: period === p ? '#fff' : 'none', border: 'none', borderRadius: 8, color: period === p ? '#000' : 'rgba(255,255,255,0.4)', fontFamily: 'Syne', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-              {p === 'weekly' ? 'Weekly' : 'Monthly'}
-            </button>
-          ))}
-        </div>
-
+    <div style={{ direction: isRTL ? 'rtl' : 'ltr', fontFamily: 'Syne, sans-serif' }}>
+      {/* Period toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {(['weekly', 'monthly'] as const).map(p => (
+          <button key={p} onClick={() => setPeriod(p)} style={{ padding: '8px 20px', background: period === p ? '#fff' : 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 8, color: period === p ? '#000' : 'rgba(255,255,255,0.5)', fontFamily: 'Syne', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            {p === 'weekly' ? l.weekly : l.monthly}
+          </button>
+        ))}
       </div>
 
-      {/* History */}
-      {showHistory && (
-        <div style={card}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2 }}>REPORT HISTORY — {periodLabel.toUpperCase()}</div>
-            <button onClick={() => setShowHistory(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 14 }}>×</button>
-          </div>
-          {history.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No saved reports yet</div>
-          ) : history.map((r, i) => (
-            <div key={i} onClick={async () => {
-                setReport(r.report); setStats(r.stats); setLoaded(true); setSavedAt(r.created_at); setShowHistory(false)
-                const t = await loadPeriodTrades(); setTrades(t)
-              }}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, marginBottom: 6, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{r.period_start} → {r.period_end}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>WR: {r.stats?.winRate}% | PnL: ${r.stats?.totalPnL?.toFixed(2)} | {r.lang?.toUpperCase()}</div>
-              </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{new Date(r.created_at).toLocaleDateString()}</div>
+      {/* DETAIL VIEW */}
+      {selected ? (
+        <div>
+          {/* Back button */}
+          <button onClick={() => { setSelected(null); setTrades([]) }} style={{ background: 'none', border: 'none', color: '#00cc77', fontFamily: 'Syne', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: 16, padding: 0 }}>
+            {l.back}
+          </button>
+
+          {/* Period header */}
+          <div style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>{period === 'weekly' ? l.weekly : l.monthly} Report</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4, fontFamily: 'JetBrains Mono' }}>{selected.period_start} → {selected.period_end}</div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Loading */}
-      {loading && (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontFamily: 'JetBrains Mono', marginBottom: 12 }}>
-            🤖 Generating {period} report in {lang.toUpperCase()}...
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontFamily: 'JetBrains Mono' }}>{new Date(selected.created_at).toLocaleDateString()}</div>
           </div>
-          <div style={{ height: 2, background: 'rgba(255,255,255,0.07)', borderRadius: 1, overflow: 'hidden', maxWidth: 300, margin: '0 auto' }}>
-            <div style={{ height: '100%', background: '#00cc77', animation: 'progress 2s infinite', width: '60%' }} />
-          </div>
-          <style>{`@keyframes progress { 0%{margin-left:-60%} 100%{margin-left:100%} }`}</style>
-        </div>
-      )}
 
-      {/* No trades message */}
-      {!loading && !loaded && (
-        <AutoHistory userId={userId} period={period} onSelect={(r: any) => { setReport(r.report); setStats(r.stats); setLoaded(true); setSavedAt(r.created_at) }} />
-      )}
-
-      {/* Stats + Charts + Report */}
-      {!loading && loaded && (
-        <>
-          {/* Stats Cards */}
-          {stats && stats.trades > 0 && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 14 }}>
-                {[
-                  { label: 'Win Rate', val: stats.winRate + '%', color: stats.winRate >= 60 ? '#00cc77' : stats.winRate >= 40 ? '#ffaa00' : '#ff4466' },
-                  { label: 'Net P&L', val: (stats.totalPnL >= 0 ? '+' : '') + stats.totalPnL?.toFixed(2) + '$', color: stats.totalPnL >= 0 ? '#00cc77' : '#ff4466' },
-                  { label: 'Discipline', val: stats.disciplineScore + '/100', color: stats.disciplineScore > 70 ? '#00cc77' : stats.disciplineScore > 40 ? '#ffaa00' : '#ff4466' },
-                  { label: 'Trades', val: stats.trades, color: '#00ccff' },
-                ].map(s => (
-                  <div key={s.label} style={card}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: s.color, fontFamily: 'JetBrains Mono' }}>{s.val}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4, letterSpacing: 1 }}>{s.label.toUpperCase()}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Charts */}
-              {trades.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                  <div style={card}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>📈 CUMULATIVE P&L</div>
-                    <ResponsiveContainer width="100%" height={150}>
-                      <AreaChart data={pnlChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#00cc77" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="#00cc77" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                        <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Area type="monotone" dataKey="cumPnL" name="Cum. P&L" stroke="#00cc77" fill="url(#pg)" strokeWidth={2} dot={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div style={card}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>💹 P&L PER TRADE</div>
-                    <ResponsiveContainer width="100%" height={150}>
-                      <BarChart data={pnlChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                        <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="pnl" name="P&L" radius={[3,3,0,0]}>
-                          {pnlChartData.map((e, i) => <Cell key={i} fill={e.pnl >= 0 ? '#00cc77' : '#ff4466'} fillOpacity={0.8} />)}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div style={card}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>🧠 DISCIPLINE PER TRADE</div>
-                    <ResponsiveContainer width="100%" height={150}>
-                      <BarChart data={disciplineData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                        <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <YAxis domain={[0,100]} tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="score" name="Score" radius={[3,3,0,0]}>
-                          {disciplineData.map((e, i) => <Cell key={i} fill={e.score === 100 ? '#00cc77' : e.score === 60 ? '#ffaa00' : '#ff4466'} fillOpacity={0.8} />)}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div style={card}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>🏆 WIN RATE BY PAIR</div>
-                    <ResponsiveContainer width="100%" height={150}>
-                      <BarChart data={pairData} layout="vertical" margin={{ top: 4, right: 30, left: 20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                        <XAxis type="number" domain={[0,100]} tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
-                        <YAxis type="category" dataKey="pair" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.5)', fontFamily: 'JetBrains Mono' }} tickLine={false} axisLine={false} width={55} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="wr" name="Win Rate %" radius={[0,3,3,0]}>
-                          {pairData.map((e, i) => <Cell key={i} fill={e.wr >= 60 ? '#00cc77' : e.wr >= 40 ? '#ffaa00' : '#ff4466'} fillOpacity={0.8} />)}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+          {/* Stats */}
+          {selected.stats && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 14 }}>
+              {[
+                { label: l.winRate, val: selected.stats.winRate + '%', color: selected.stats.winRate >= 60 ? '#00cc77' : selected.stats.winRate >= 40 ? '#ffaa00' : '#ff4466' },
+                { label: l.netPnL, val: (selected.stats.totalPnL >= 0 ? '+' : '') + selected.stats.totalPnL?.toFixed(2) + '$', color: selected.stats.totalPnL >= 0 ? '#00cc77' : '#ff4466' },
+                { label: l.discipline, val: selected.stats.disciplineScore + '/100', color: selected.stats.disciplineScore > 70 ? '#00cc77' : selected.stats.disciplineScore > 40 ? '#ffaa00' : '#ff4466' },
+                { label: l.trades, val: selected.stats.trades, color: '#00ccff' },
+              ].map(s => (
+                <div key={s.label} style={card}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: s.color, fontFamily: 'JetBrains Mono' }}>{s.val}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 4, letterSpacing: 1 }}>{s.label?.toUpperCase()}</div>
                 </div>
-              )}
+              ))}
+            </div>
+          )}
 
-              {/* Behavior */}
+          {/* Charts */}
+          {tradesForChart.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
               <div style={card}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>⚠️ BEHAVIOR FLAGS</div>
-                {[
-                  { label: 'Revenge Trades', val: stats.revengeCount, color: '#ffaa00', warn: stats.revengeCount > 0 },
-                  { label: 'Strategy Breaks', val: stats.stratBreaks, color: '#cc44ff', warn: stats.stratBreaks > 0 },
-                  { label: 'Clean Trades', val: stats.trades - stats.revengeCount - stats.stratBreaks, color: '#00cc77', warn: false },
-                ].map(item => (
-                  <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, marginBottom: 6, border: `1px solid ${item.warn ? item.color + '33' : 'rgba(255,255,255,0.05)'}` }}>
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
-                    <span style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono', color: item.color }}>{item.val}</span>
-                  </div>
-                ))}
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>📈 {l.cumPnL}</div>
+                <ResponsiveContainer width="100%" height={150}>
+                  <AreaChart data={pnlChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#00cc77" stopOpacity={0.2}/><stop offset="95%" stopColor="#00cc77" stopOpacity={0}/></linearGradient></defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="cumPnL" name="Cum. P&L" stroke="#00cc77" fill="url(#pg)" strokeWidth={2} dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-            </>
+              <div style={card}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>💹 {l.pnlTrade}</div>
+                <ResponsiveContainer width="100%" height={150}>
+                  <BarChart data={pnlChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="pnl" name="P&L" radius={[3,3,0,0]}>
+                      {pnlChartData.map((e, i) => <Cell key={i} fill={e.pnl >= 0 ? '#00cc77' : '#ff4466'} fillOpacity={0.8} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={card}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>🧠 {l.discTrade}</div>
+                <ResponsiveContainer width="100%" height={150}>
+                  <BarChart data={disciplineData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <YAxis domain={[0,100]} tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="score" name="Score" radius={[3,3,0,0]}>
+                      {disciplineData.map((e, i) => <Cell key={i} fill={e.score === 100 ? '#00cc77' : e.score === 60 ? '#ffaa00' : '#ff4466'} fillOpacity={0.8} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={card}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>🏆 {l.winPair}</div>
+                <ResponsiveContainer width="100%" height={150}>
+                  <BarChart data={pairData} layout="vertical" margin={{ top: 4, right: 30, left: 20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis type="number" domain={[0,100]} tick={{ fontSize: 8, fill: 'rgba(255,255,255,0.2)' }} tickLine={false} axisLine={false} />
+                    <YAxis type="category" dataKey="pair" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.5)', fontFamily: 'JetBrains Mono' }} tickLine={false} axisLine={false} width={55} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="wr" name="Win Rate %" radius={[0,3,3,0]}>
+                      {pairData.map((e, i) => <Cell key={i} fill={e.wr >= 60 ? '#00cc77' : e.wr >= 40 ? '#ffaa00' : '#ff4466'} fillOpacity={0.8} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Behavior flags */}
+          {selected.stats && (
+            <div style={card}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 12 }}>⚠️ {l.behaviorFlags}</div>
+              {[
+                { label: l.revenge, val: selected.stats.revengeCount, color: '#ffaa00', warn: selected.stats.revengeCount > 0 },
+                { label: l.stratBreaks, val: selected.stats.stratBreaks, color: '#cc44ff', warn: selected.stats.stratBreaks > 0 },
+                { label: l.clean, val: selected.stats.trades - selected.stats.revengeCount - selected.stats.stratBreaks, color: '#00cc77', warn: false },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, marginBottom: 6, border: `1px solid ${item.warn ? item.color + '33' : 'rgba(255,255,255,0.05)'}` }}>
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{item.label}</span>
+                  <span style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono', color: item.color }}>{item.val}</span>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* AI Report */}
           <div style={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2 }}>🤖 AI {periodLabel.toUpperCase()} COACHING REPORT</div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                {savedAt && <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'JetBrains Mono' }}>{new Date(savedAt).toLocaleDateString()}</span>}
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontFamily: 'JetBrains Mono' }}>claude sonnet</span>
-              </div>
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.9, whiteSpace: 'pre-wrap' }}>{report}</div>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-function AutoHistory({ userId, period, onSelect }: any) {
-  const [history, setHistory] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    async function load() {
-      if (!userId) return
-      const { createClient } = await import('@/lib/supabase')
-      const supabase = createClient()
-      const { data } = await supabase.from('weekly_reports').select('*').eq('user_id', userId).eq('period', period).order('created_at', { ascending: false }).limit(5)
-      setHistory(data || [])
-      setLoading(false)
-    }
-    load()
-  }, [userId, period])
-  const card: React.CSSProperties = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 14 }
-  if (loading) return <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading...</div>
-  return (
-    <div style={card}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 14 }}>PREVIOUS {period === 'weekly' ? 'WEEK' : 'MONTH'} REPORTS</div>
-      {history.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No previous reports yet</div>
-      ) : history.map((r, i) => (
-        <div key={i} onClick={() => onSelect(r)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 8, marginBottom: 8, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)' }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')} onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{r.period_start} → {r.period_end}</div>
-            <div style={{ display: 'flex', gap: 12, fontSize: 11, fontFamily: 'JetBrains Mono' }}>
-              <span style={{ color: r.stats?.winRate >= 60 ? '#00cc77' : '#ffaa00' }}>{r.stats?.winRate}% WR</span>
-              <span style={{ color: r.stats?.totalPnL >= 0 ? '#00cc77' : '#ff4466' }}>{r.stats?.totalPnL >= 0 ? '+' : ''}${r.stats?.totalPnL?.toFixed(2)}</span>
-              <span style={{ color: '#00ccff' }}>{r.stats?.trades} trades</span>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 16 }}>🤖 {l.coachReport}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.9 }}>
+              {formatReport(selected.report || '')}
             </div>
           </div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{new Date(r.created_at).toLocaleDateString()}</div>
         </div>
-      ))}
+      ) : (
+        /* LIST VIEW */
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>{l.history}</div>
+            {!demoTrades && (
+              <button onClick={generateReport} disabled={generating} style={{ padding: '8px 16px', background: generating ? 'rgba(0,204,119,0.3)' : 'rgba(0,204,119,0.1)', border: '1px solid rgba(0,204,119,0.3)', borderRadius: 8, color: '#00cc77', fontFamily: 'Syne', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
+                {generating ? '⏳ ' + l.generating : '+ ' + l.generate}
+              </button>
+            )}
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading...</div>
+          ) : reports.length === 0 ? (
+            <div style={{ ...card, textAlign: 'center', padding: 40 }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>📊</div>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6 }}>{l.noReports}</div>
+            </div>
+          ) : (
+            reports.map((r, i) => (
+              <div key={i} onClick={() => handleSelect(r)}
+                style={{ ...card, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all .2s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,204,119,0.05)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,204,119,0.2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 6 }}>
+                    {period === 'weekly' ? '📅' : '🗓️'} {r.period_start} → {r.period_end}
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, fontSize: 12, fontFamily: 'JetBrains Mono' }}>
+                    <span style={{ color: r.stats?.winRate >= 60 ? '#00cc77' : r.stats?.winRate >= 40 ? '#ffaa00' : '#ff4466' }}>
+                      {r.stats?.winRate}% WR
+                    </span>
+                    <span style={{ color: r.stats?.totalPnL >= 0 ? '#00cc77' : '#ff4466' }}>
+                      {r.stats?.totalPnL >= 0 ? '+' : ''}${r.stats?.totalPnL?.toFixed(2)}
+                    </span>
+                    <span style={{ color: '#00ccff' }}>{r.stats?.trades} trades</span>
+                    <span style={{ color: r.stats?.disciplineScore > 70 ? '#00cc77' : '#ffaa00' }}>
+                      {r.stats?.disciplineScore}/100 disc
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{new Date(r.created_at).toLocaleDateString()}</div>
+                  <span style={{ color: '#00cc77', fontSize: 16 }}>›</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }
