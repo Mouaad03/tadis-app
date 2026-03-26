@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -13,7 +13,7 @@ const T: Record<string, Record<string, string>> = {
   es: { create: 'Crear cuenta', login: 'Iniciar sesión', title_register: 'Empieza a operar con disciplina', title_login: 'Bienvenido de nuevo', sub_register: 'Cuenta gratuita — sin tarjeta de crédito', sub_login: 'Inicia sesión en tu cuenta TRADIS', name: 'Nombre de trading', name_ph: 'Tu nombre', country: 'País', country_ph: 'Tu país', email: 'Email', password: 'Contraseña', btn_register: 'Crear cuenta gratis', btn_login: 'Iniciar sesión', already: '¿Ya tienes cuenta? Iniciar sesión', no_account: '¿No tienes cuenta? Regístrate gratis', terms: 'Al crear una cuenta, aceptas nuestros términos de servicio.' },
 }
 
-function AuthPageContent() {
+export default function AuthPage() {
   const searchParams = useSearchParams()
   const mode = searchParams.get('mode')
   const [isLogin, setIsLogin] = useState(mode !== 'register')
@@ -190,12 +190,3 @@ function AuthPageContent() {
 
 const labelStyle: React.CSSProperties = { fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 6, fontWeight: 600 }
 const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#ffffff', fontFamily: 'JetBrains Mono', fontSize: 14, outline: 'none' }
-
-export default function AuthPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AuthPageContent />
-    </Suspense>
-  )
-}
-

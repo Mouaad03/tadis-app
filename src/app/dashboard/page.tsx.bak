@@ -1,5 +1,5 @@
 'use client'
-import React, { Suspense } from 'react'
+import React from 'react'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -15,7 +15,7 @@ import { Trade, Profile } from '@/types'
 
 type Tab = 'pre-trade' | 'journal' | 'weekly'
 
-function DashboardContent() {
+export default function Dashboard() {
   const [tab, setTab] = useState<Tab>('pre-trade')
   const [profile, setProfile] = useState<Profile | null>(null)
   const [todayTrades, setTodayTrades] = useState<Trade[]>([])
@@ -259,12 +259,3 @@ function AccountSwitcher({ accounts, active, onChange, onAdd }: any) {
     </div>
   )
 }
-
-export default function Dashboard() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
-    </Suspense>
-  )
-}
-
