@@ -1,0 +1,359 @@
+'use client'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+
+const LANGS = {
+  en: {
+    nav: ['Features', 'How it works', 'Pricing'],
+    hero_tag: 'Trading Psychology Tool',
+    hero_h1: 'Stop losing trades\nto your emotions.',
+    hero_sub: 'TRADIS enforces discipline before every trade. Pre-trade checklist, real-time risk calculator, AI coaching — all in one.',
+    hero_cta: 'Start Free',
+    hero_cta2: 'See how it works',
+    stats: [['10x', 'Less revenge trades'], ['2min', 'Setup time'], ['4', 'Languages']],
+    feat_title: 'Everything a disciplined trader needs',
+    features: [
+      { icon: '🚦', title: 'Pre-Trade Gate', desc: 'Blocked from entering until your checklist is complete. No exceptions.' },
+      { icon: '📊', title: 'Live Lot Calculator', desc: 'Auto-fills entry, SL and TP with current market price. Calculates lot size instantly.' },
+      { icon: '⏱', title: 'Revenge Timer', desc: '30-minute cooldown after every loss. Forces emotional reset before next trade.' },
+      { icon: '🤖', title: 'AI Coach', desc: 'Claude AI analyzes each trade and gives you honest feedback. Weekly behavior report.' },
+      { icon: '📓', title: 'Trade Journal', desc: 'Calendar view with screenshots, notes, win rate, and discipline score per day.' },
+      { icon: '🎯', title: 'Custom Checklist', desc: 'Build your own pre-trade rules. Add, edit, remove conditions. Saved per account.' },
+    ],
+    how_title: 'How TRADIS works',
+    steps: [
+      { n: '01', title: 'Set your rules', desc: 'Add your checklist conditions, strategies, account balance and risk %.' },
+      { n: '02', title: 'Before every trade', desc: 'Select pair → live price loads → fill checklist → only then you can enter.' },
+      { n: '03', title: 'After close', desc: 'Log result. AI gives instant feedback. Discipline score updates.' },
+      { n: '04', title: 'Weekly review', desc: 'AI generates a full coaching report. See patterns. Improve week by week.' },
+    ],
+    price_title: 'Simple pricing',
+    plans: [
+      { name: 'Free', price: '$0', period: '/forever', features: ['Pre-trade gate', 'Lot calculator', 'Trade journal', 'Up to 10 trades/day', '4 languages'], cta: 'Get started', highlight: false },
+      { name: 'Pro', price: '$12', period: '/month', features: ['Everything in Free', 'AI trade feedback', 'Weekly AI report', 'Unlimited trades', 'Priority support'], cta: 'Start Pro', highlight: true },
+    ],
+    faq_title: 'FAQ',
+    faqs: [
+      { q: 'Do I need to connect my broker?', a: 'No. TRADIS is a discipline tool, not a broker. You enter trades manually — no API connection needed.' },
+      { q: 'What pairs are supported?', a: 'All Forex pairs, Gold, Silver, major Indices (SPX, NAS, DAX...) and top Crypto pairs.' },
+      { q: 'Is my data private?', a: 'Yes. Your trades and checklist are stored in your private account. We never share or sell data.' },
+    ],
+    footer: '© 2025 TRADIS — Trading Discipline System',
+    login: 'Login',
+  },
+  fr: {
+    nav: ['Fonctionnalités', 'Comment ça marche', 'Tarifs'],
+    hero_tag: 'Outil de Psychologie Trading',
+    hero_h1: 'Arrêtez de perdre\npar émotion.',
+    hero_sub: 'TRADIS impose la discipline avant chaque trade. Checklist pré-trade, calculateur de risque, coaching IA — tout en un.',
+    hero_cta: 'Commencer gratuitement',
+    hero_cta2: 'Voir comment ça marche',
+    stats: [['10x', 'Moins de revenge trades'], ['2min', 'Configuration'], ['4', 'Langues']],
+    feat_title: 'Tout ce dont un trader discipliné a besoin',
+    features: [
+      { icon: '🚦', title: 'Portail Pré-Trade', desc: 'Impossible d\'entrer sans compléter votre checklist. Aucune exception.' },
+      { icon: '📊', title: 'Calculateur Live', desc: 'Remplit automatiquement entry, SL et TP avec le prix actuel du marché.' },
+      { icon: '⏱', title: 'Timer Anti-Revenge', desc: '30 minutes de cooldown après chaque perte. Reset émotionnel forcé.' },
+      { icon: '🤖', title: 'Coach IA', desc: 'Claude AI analyse chaque trade et donne un feedback honnête. Rapport hebdomadaire.' },
+      { icon: '📓', title: 'Journal de Trading', desc: 'Vue calendrier avec captures, notes, win rate et score de discipline.' },
+      { icon: '🎯', title: 'Checklist Personnalisée', desc: 'Créez vos propres règles. Ajoutez, modifiez, supprimez des conditions.' },
+    ],
+    how_title: 'Comment TRADIS fonctionne',
+    steps: [
+      { n: '01', title: 'Configurez vos règles', desc: 'Ajoutez vos conditions, stratégies, solde et risque %.' },
+      { n: '02', title: 'Avant chaque trade', desc: 'Sélectionnez la paire → prix en direct → checklist → entrée autorisée.' },
+      { n: '03', title: 'Après la clôture', desc: 'Notez le résultat. L\'IA donne un feedback instantané.' },
+      { n: '04', title: 'Revue hebdomadaire', desc: 'L\'IA génère un rapport de coaching complet. Améliorez-vous.' },
+    ],
+    price_title: 'Tarification simple',
+    plans: [
+      { name: 'Gratuit', price: '0€', period: '/toujours', features: ['Portail pré-trade', 'Calculateur de lot', 'Journal de trading', 'Jusqu\'à 10 trades/jour', '4 langues'], cta: 'Commencer', highlight: false },
+      { name: 'Pro', price: '12€', period: '/mois', features: ['Tout le plan Gratuit', 'Feedback IA par trade', 'Rapport IA hebdomadaire', 'Trades illimités', 'Support prioritaire'], cta: 'Passer Pro', highlight: true },
+    ],
+    faq_title: 'FAQ',
+    faqs: [
+      { q: 'Dois-je connecter mon courtier?', a: 'Non. TRADIS est un outil de discipline, pas un courtier. Vous entrez les trades manuellement.' },
+      { q: 'Quelles paires sont supportées?', a: 'Toutes les paires Forex, Or, Argent, grands Indices et top Crypto.' },
+      { q: 'Mes données sont-elles privées?', a: 'Oui. Vos trades sont stockés dans votre compte privé. Nous ne partageons jamais les données.' },
+    ],
+    footer: '© 2025 TRADIS — Système de Discipline de Trading',
+    login: 'Connexion',
+  },
+  ar: {
+    nav: ['المميزات', 'كيف يعمل', 'الأسعار'],
+    hero_tag: 'أداة علم نفس التداول',
+    hero_h1: 'توقف عن خسارة\nصفقاتك بسبب عواطفك.',
+    hero_sub: 'تراديس يفرض الانضباط قبل كل صفقة. قائمة تحقق، حاسبة المخاطر الفورية، مدرب ذكاء اصطناعي — كل شيء في مكان واحد.',
+    hero_cta: 'ابدأ مجاناً',
+    hero_cta2: 'شاهد كيف يعمل',
+    stats: [['10x', 'أقل صفقات انتقامية'], ['2 دقيقة', 'وقت الإعداد'], ['4', 'لغات']],
+    feat_title: 'كل ما يحتاجه المتداول المنضبط',
+    features: [
+      { icon: '🚦', title: 'بوابة ما قبل الصفقة', desc: 'لا يمكنك الدخول حتى تكمل قائمتك. بدون استثناء.' },
+      { icon: '📊', title: 'حاسبة اللوت الفورية', desc: 'تملأ تلقائياً نقطة الدخول، وقف الخسارة وجني الأرباح بالسعر الحالي.' },
+      { icon: '⏱', title: 'مؤقت مكافحة الانتقام', desc: '30 دقيقة راحة إلزامية بعد كل خسارة. إعادة ضبط عاطفي.' },
+      { icon: '🤖', title: 'مدرب الذكاء الاصطناعي', desc: 'يحلل كل صفقة ويعطيك ملاحظات صادقة. تقرير أسبوعي شامل.' },
+      { icon: '📓', title: 'سجل التداول', desc: 'عرض تقويمي مع صور الشاشة والملاحظات ونسبة النجاح.' },
+      { icon: '🎯', title: 'قائمة تحقق مخصصة', desc: 'أنشئ قواعدك الخاصة. أضف وعدّل واحذف الشروط.' },
+    ],
+    how_title: 'كيف يعمل تراديس',
+    steps: [
+      { n: '٠١', title: 'حدد قواعدك', desc: 'أضف شروط قائمتك واستراتيجياتك ورصيدك ونسبة المخاطرة.' },
+      { n: '٠٢', title: 'قبل كل صفقة', desc: 'اختر الزوج ← يتحمل السعر الحالي ← أكمل القائمة ← يُسمح بالدخول.' },
+      { n: '٠٣', title: 'بعد الإغلاق', dest: 'سجل النتيجة. يعطي الذكاء الاصطناعي ملاحظات فورية.' },
+      { n: '٠٤', title: 'المراجعة الأسبوعية', desc: 'يولد الذكاء الاصطناعي تقرير تدريب كامل. تحسن أسبوعاً بعد أسبوع.' },
+    ],
+    price_title: 'تسعير بسيط',
+    plans: [
+      { name: 'مجاني', price: '$0', period: '/للأبد', features: ['بوابة ما قبل الصفقة', 'حاسبة اللوت', 'سجل التداول', 'حتى 10 صفقات/يوم', '4 لغات'], cta: 'ابدأ الآن', highlight: false },
+      { name: 'برو', price: '$12', period: '/شهر', features: ['كل ما في المجاني', 'ملاحظات AI لكل صفقة', 'تقرير AI أسبوعي', 'صفقات غير محدودة', 'دعم أولوية'], cta: 'اشترك في برو', highlight: true },
+    ],
+    faq_title: 'الأسئلة الشائعة',
+    faqs: [
+      { q: 'هل أحتاج لربط حساب الوساطة؟', a: 'لا. تراديس أداة انضباط وليست وسيطاً. تدخل الصفقات يدوياً.' },
+      { q: 'ما الأزواج المدعومة؟', a: 'جميع أزواج الفوركس، الذهب، الفضة، المؤشرات الكبرى والعملات الرقمية.' },
+      { q: 'هل بياناتي خاصة؟', a: 'نعم. صفقاتك مخزنة في حسابك الخاص. لا نشارك البيانات أبداً.' },
+    ],
+    footer: '© 2025 تراديس — نظام انضباط التداول',
+    login: 'دخول',
+  },
+  es: {
+    nav: ['Características', 'Cómo funciona', 'Precios'],
+    hero_tag: 'Herramienta de Psicología Trading',
+    hero_h1: 'Deja de perder trades\npor tus emociones.',
+    hero_sub: 'TRADIS impone disciplina antes de cada operación. Checklist pre-trade, calculadora de riesgo en tiempo real, coaching IA — todo en uno.',
+    hero_cta: 'Empezar gratis',
+    hero_cta2: 'Ver cómo funciona',
+    stats: [['10x', 'Menos revenge trades'], ['2min', 'Configuración'], ['4', 'Idiomas']],
+    feat_title: 'Todo lo que un trader disciplinado necesita',
+    features: [
+      { icon: '🚦', title: 'Puerta Pre-Trade', desc: 'Bloqueado hasta completar tu checklist. Sin excepciones.' },
+      { icon: '📊', title: 'Calculadora en Vivo', desc: 'Rellena automáticamente entrada, SL y TP con el precio actual.' },
+      { icon: '⏱', title: 'Timer Anti-Venganza', desc: '30 minutos de cooldown tras cada pérdida. Reset emocional forzado.' },
+      { icon: '🤖', title: 'Coach IA', desc: 'Claude AI analiza cada trade y da feedback honesto. Reporte semanal.' },
+      { icon: '📓', title: 'Diario de Trading', desc: 'Vista de calendario con capturas, notas, win rate y puntuación.' },
+      { icon: '🎯', title: 'Checklist Personalizada', desc: 'Crea tus propias reglas. Añade, edita, elimina condiciones.' },
+    ],
+    how_title: 'Cómo funciona TRADIS',
+    steps: [
+      { n: '01', title: 'Configura tus reglas', desc: 'Añade tus condiciones, estrategias, balance y riesgo %.' },
+      { n: '02', title: 'Antes de cada trade', desc: 'Selecciona par → precio en directo → checklist → entrada autorizada.' },
+      { n: '03', title: 'Tras el cierre', desc: 'Registra resultado. IA da feedback instantáneo.' },
+      { n: '04', title: 'Revisión semanal', desc: 'IA genera informe de coaching completo. Mejora semana a semana.' },
+    ],
+    price_title: 'Precios simples',
+    plans: [
+      { name: 'Gratis', price: '$0', period: '/siempre', features: ['Puerta pre-trade', 'Calculadora de lote', 'Diario de trading', 'Hasta 10 trades/día', '4 idiomas'], cta: 'Empezar', highlight: false },
+      { name: 'Pro', price: '$12', period: '/mes', features: ['Todo lo gratuito', 'Feedback IA por trade', 'Informe IA semanal', 'Trades ilimitados', 'Soporte prioritario'], cta: 'Ir Pro', highlight: true },
+    ],
+    faq_title: 'Preguntas frecuentes',
+    faqs: [
+      { q: '¿Necesito conectar mi broker?', a: 'No. TRADIS es una herramienta de disciplina, no un broker. Introduces los trades manualmente.' },
+      { q: '¿Qué pares están soportados?', a: 'Todos los pares Forex, Oro, Plata, índices principales y top Crypto.' },
+      { q: '¿Son privados mis datos?', a: 'Sí. Tus trades se almacenan en tu cuenta privada. Nunca compartimos datos.' },
+    ],
+    footer: '© 2025 TRADIS — Sistema de Disciplina de Trading',
+    login: 'Iniciar sesión',
+  }
+}
+
+type LangKey = keyof typeof LANGS
+
+export default function LandingPage() {
+  const [lang, setLangState] = useState<LangKey>('en')
+  const [langOpen, setLangOpen] = useState(false)
+  const langRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const c = LANGS[lang]
+  const isRTL = lang === 'ar'
+
+  useEffect(() => {
+    const saved = localStorage.getItem('tradis_lang') as LangKey
+    if (saved && LANGS[saved]) setLangState(saved)
+    function handleClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function changeLang(l: LangKey) {
+    setLangState(l)
+    localStorage.setItem('tradis_lang', l)
+  }
+
+  return (
+    <div style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #000000 50%, #080810 100%)', color: '#e8e8f0', fontFamily: "'Syne', sans-serif", minHeight: '100vh', direction: isRTL ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #000000; }
+        .fade-in { animation: fadeUp .6s ease forwards; opacity: 0; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .card-hover { transition: transform .2s, border-color .2s; }
+        .card-hover:hover { transform: translateY(-4px); border-color: #00ff8844 !important; }
+        .btn-glow { transition: all .2s; }
+        .btn-glow:hover { box-shadow: 0 0 24px #00ff8844; }
+        .grid-bg { background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px); background-size: 40px 40px; }
+        .logo-wrap { display: flex; align-items: center; gap: 12px; padding-left: 4px; cursor: pointer; text-decoration: none; transition: all .25s; }
+        .logo-wrap:hover .logo-img { filter: drop-shadow(0 0 14px #00ff88cc) drop-shadow(0 0 28px #00ff8866); transform: scale(1.04); }
+        .logo-wrap:hover .logo-text { color: #00ff88; letter-spacing: 4px; }
+        .logo-img { height: 54px; width: auto; mix-blend-mode: screen; filter: drop-shadow(0 0 8px #00ff8866); transition: all .25s; }
+        .logo-text { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 3px; color: #e8e8f0; transition: all .25s; }
+        .nav-link { color: #888890; font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: 0.5px; transition: color .2s; }
+        .nav-link:hover { color: #e8e8f0; }
+      ` }} />
+
+      {/* NAV */}
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: '#000000', borderBottom: '1px solid #1a1a28', padding: '0 24px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
+          <div className="logo-wrap" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img src="/logo.jpg" alt="TRADIS" style={{ height: '75px', width: 'auto' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            {c.nav.map(n => <a key={n} className="nav-link" href={`#${n.toLowerCase().replace(/\s/g,'-')}`}>{n}</a>)}
+            <div ref={langRef} style={{ position: 'relative' }}>
+              <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                <span style={{ fontSize: '16px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
+                <span>{lang.toUpperCase()}</span>
+                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)' }}>{langOpen ? '▲' : '▼'}</span>
+              </button>
+              {langOpen && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', minWidth: '160px', zIndex: 300 }}>
+                  {(['en','fr','ar','es'] as LangKey[]).map(l => (
+                    <button key={l} onClick={() => { changeLang(l); setLangOpen(false) }} style={{ width: '100%', padding: '12px 16px', background: lang === l ? 'rgba(255,255,255,0.07)' : 'none', border: 'none', color: lang === l ? '#fff' : 'rgba(255,255,255,0.55)', fontFamily: 'Syne', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '18px' }}>{l === 'en' ? '🇬🇧' : l === 'fr' ? '🇫🇷' : l === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
+                      <span>{l === 'en' ? 'English' : l === 'fr' ? 'Français' : l === 'ar' ? 'العربية' : 'Español'}</span>
+                      {lang === l && <span style={{ marginLeft: 'auto', fontSize: '12px' }}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={() => router.push('/auth')} style={{ padding: '8px 18px', background: '#00ff88', border: 'none', borderRadius: '8px', color: '#0a0a0f', fontFamily: 'Syne', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>{c.login}</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="grid-bg" style={{ minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '80px 24px', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '600px', height: '600px', background: '#00ff8808', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '800px', position: 'relative' }}>
+          <div className="fade-in" style={{ animationDelay: '.1s', display: 'inline-block', background: '#00ff8811', border: '1px solid #00ff8833', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', color: '#00ff88', fontWeight: 700, letterSpacing: '1px', marginBottom: '24px' }}>
+            {c.hero_tag}
+          </div>
+          <h1 className="fade-in" style={{ animationDelay: '.2s', fontSize: 'clamp(40px, 8vw, 80px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-2px', marginBottom: '24px', whiteSpace: 'pre-line' }}>
+            {c.hero_h1.split('\n').map((line, i) => (
+              <span key={i} style={{ display: 'block', color: i === 1 ? '#00ff88' : '#e8e8f0' }}>{line}</span>
+            ))}
+          </h1>
+          <p className="fade-in" style={{ animationDelay: '.3s', fontSize: '18px', color: '#888890', lineHeight: 1.7, marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>{c.hero_sub}</p>
+          <div className="fade-in" style={{ animationDelay: '.4s', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => router.push('/auth')} className="btn-glow" style={{ padding: '14px 32px', background: '#00ff88', border: 'none', borderRadius: '10px', color: '#0a0a0f', fontFamily: 'Syne', fontWeight: 700, fontSize: '15px', cursor: 'pointer', letterSpacing: '0.5px' }}>{c.hero_cta}</button>
+            <button onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })} style={{ padding: '14px 32px', background: 'none', border: '1px solid #1e1e30', borderRadius: '10px', color: '#888890', fontFamily: 'Syne', fontWeight: 600, fontSize: '15px', cursor: 'pointer' }}>{c.hero_cta2}</button>
+          </div>
+          <div className="fade-in" style={{ animationDelay: '.5s', display: 'flex', gap: '40px', justifyContent: 'center', marginTop: '60px', flexWrap: 'wrap' }}>
+            {c.stats.map(([val, label]) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', fontWeight: 800, color: '#00ff88', fontFamily: 'JetBrains Mono' }}>{val}</div>
+                <div style={{ fontSize: '12px', color: '#555570', marginTop: '4px' }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, letterSpacing: '-1px', marginBottom: '16px' }}>{c.feat_title}</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+          {c.features.map((f, i) => (
+            <div key={i} className="card-hover" style={{ background: '#0d0d18', border: '1px solid #1a1a28', borderRadius: '16px', padding: '28px', animationDelay: `${i * .1}s` }}>
+              <div style={{ fontSize: '32px', marginBottom: '16px' }}>{f.icon}</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#e8e8f0' }}>{f.title}</div>
+              <div style={{ fontSize: '14px', color: '#666680', lineHeight: 1.6 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how" style={{ padding: '100px 24px', background: '#0a0a12' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, letterSpacing: '-1px' }}>{c.how_title}</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {c.steps.map((step, i) => (
+              <div key={i} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', padding: '32px 0', borderBottom: i < c.steps.length - 1 ? '1px solid #1a1a28' : 'none' }}>
+                <div style={{ fontSize: '28px', fontWeight: 800, color: '#00ff88', fontFamily: 'JetBrains Mono', minWidth: '48px', opacity: 0.5 }}>{step.n}</div>
+                <div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
+                  <div style={{ fontSize: '14px', color: '#666680', lineHeight: 1.6 }}>{(step as any).desc || (step as any).dest}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" style={{ padding: '100px 24px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, letterSpacing: '-1px' }}>{c.price_title}</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+          {c.plans.map((plan, i) => (
+            <div key={i} style={{ background: plan.highlight ? '#0d1a0d' : '#0d0d18', border: `2px solid ${plan.highlight ? '#00ff88' : '#1a1a28'}`, borderRadius: '20px', padding: '36px', position: 'relative' }}>
+              {plan.highlight && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: '#00ff88', color: '#0a0a0f', fontSize: '11px', fontWeight: 800, padding: '4px 14px', borderRadius: '20px', letterSpacing: '1px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
+              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '24px' }}>
+                <span style={{ fontSize: '42px', fontWeight: 800, color: plan.highlight ? '#00ff88' : '#e8e8f0', fontFamily: 'JetBrains Mono' }}>{plan.price}</span>
+                <span style={{ fontSize: '14px', color: '#555570' }}>{plan.period}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+                {plan.features.map((f, j) => (
+                  <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#aaaacc' }}>
+                    <span style={{ color: '#00ff88', fontWeight: 700 }}>✓</span> {f}
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => router.push('/auth')} style={{ width: '100%', padding: '13px', background: plan.highlight ? '#00ff88' : 'none', border: plan.highlight ? 'none' : '1px solid #1e1e30', borderRadius: '10px', color: plan.highlight ? '#0a0a0f' : '#888890', fontFamily: 'Syne', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>{plan.cta}</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section style={{ padding: '80px 24px', background: '#0a0a12' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '32px', fontWeight: 800, textAlign: 'center', marginBottom: '48px' }}>{c.faq_title}</h2>
+          {c.faqs.map((faq, i) => (
+            <div key={i} style={{ borderBottom: '1px solid #1a1a28', padding: '24px 0' }}>
+              <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#e8e8f0' }}>{faq.q}</div>
+              <div style={{ fontSize: '14px', color: '#666680', lineHeight: 1.6 }}>{faq.a}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ padding: '100px 24px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, letterSpacing: '-1px', marginBottom: '20px' }}>
+            Ready to trade with <span style={{ color: '#00ff88' }}>discipline</span>?
+          </h2>
+          <p style={{ fontSize: '16px', color: '#666680', marginBottom: '36px' }}>Join traders who stopped blaming the market and started fixing their behavior.</p>
+          <button onClick={() => router.push('/auth')} className="btn-glow" style={{ padding: '16px 40px', background: '#00ff88', border: 'none', borderRadius: '12px', color: '#0a0a0f', fontFamily: 'Syne', fontWeight: 800, fontSize: '16px', cursor: 'pointer', letterSpacing: '0.5px' }}>{c.hero_cta}</button>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop: '1px solid #1a1a28', padding: '24px', textAlign: 'center', fontSize: '13px', color: '#555570' }}>
+        {c.footer}
+      </footer>
+    </div>
+  )
+}
