@@ -180,68 +180,65 @@ export default function ProfilePage() {
         )}
 
         {/* PAYMENT TAB */}
-        {tab === 'payment' && (
-          <>
+                {tab === 'payment' && (
+          <div>
             <div style={card}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 20 }}>PAYMENT METHODS</div>
-              <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.2)', fontSize: 13, marginBottom: 16 }}>No payment methods saved yet</div>
-              <button onClick={() => setShowAddCard(!showAddCard)} style={{ ...btn, background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                + Add Payment Method
-              </button>
-              {showAddCard && (
-                <div style={{ marginTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 16 }}>NEW CARD</div>
-                  <div style={{ marginBottom: 14 }}>
-                    <label style={label}>CARD NUMBER</label>
-                    <input style={input} value={cardNumber} onChange={e => setCardNumber(e.target.value.replace(/D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim())} placeholder="1234 5678 9012 3456" maxLength={19} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                    <div>
-                      <label style={label}>EXPIRY DATE</label>
-                      <input style={input} value={cardExpiry} onChange={e => setCardExpiry(e.target.value.replace(/D/g,'').slice(0,4).replace(/(.{2})/,'$1/'))} placeholder="MM/YY" maxLength={5} />
-                    </div>
-                    <div>
-                      <label style={label}>CVV</label>
-                      <input style={input} value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/D/g,'').slice(0,3))} placeholder="123" maxLength={3} type="password" />
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: 20 }}>
-                    <label style={label}>CARDHOLDER NAME</label>
-                    <input style={input} value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Adam Trader" />
-                  </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => { setShowAddCard(false); setMsg('Payment method saved!'); setTimeout(() => setMsg(''), 3000) }} style={btn}>Save Card</button>
-                    <button onClick={() => setShowAddCard(false)} style={{ ...btn, background: 'none', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>Cancel</button>
-                  </div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 16 }}>BILLING & SUBSCRIPTION</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'rgba(0,204,119,0.06)', border: '1px solid rgba(0,204,119,0.15)', borderRadius: 10, marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#00cc77' }}>{profile?.is_pro ? 'Pro Plan — $9/month' : 'Free Trial'}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{profile?.is_pro ? 'Active subscription' : 'Trial period'}</div>
                 </div>
-              )}
+                <div style={{ fontSize: 11, fontWeight: 700, color: profile?.is_pro ? '#00cc77' : '#ffaa00', padding: '4px 10px', background: profile?.is_pro ? 'rgba(0,204,119,0.1)' : 'rgba(255,170,0,0.1)', borderRadius: 20, border: profile?.is_pro ? '1px solid rgba(0,204,119,0.2)' : '1px solid rgba(255,170,0,0.2)' }}>
+                  {profile?.is_pro ? 'ACTIVE' : 'TRIAL'}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button
+                  onClick={() => window.open('https://billing.tradis.live', '_blank')}
+                  style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+                  📋 View Payment History & Invoices
+                </button>
+                <button
+                  onClick={() => window.open('https://app.lemonsqueezy.com/my-orders', '_blank')}
+                  style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+                  💳 Manage Payment Method
+                </button>
+                {profile?.is_pro && (
+                  <button
+                    onClick={() => window.open('https://app.lemonsqueezy.com/my-orders', '_blank')}
+                    style={{ padding: '12px 20px', background: 'rgba(255,68,102,0.06)', border: '1px solid rgba(255,68,102,0.2)', borderRadius: 10, color: '#ff4466', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+                    ❌ Cancel Subscription
+                  </button>
+                )}
+                {!profile?.is_pro && (
+                  <button
+                    onClick={() => window.location.href = '/upgrade'}
+                    style={{ padding: '12px 20px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 10, color: '#000', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>
+                    🚀 Upgrade to Pro — $9/month
+                  </button>
+                )}
+              </div>
             </div>
-            <div style={card}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 16 }}>PAYMENT HISTORY</div>
-              <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No payment history yet</div>
-            </div>
-          </>
+          </div>
         )}
-
-        {/* SUBSCRIPTION TAB */}
         {tab === 'subscription' && (
           <div style={card}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 20 }}>SUBSCRIPTION PLAN</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               {[
-                { name: 'Free', price: '$0/mo', features: ['1 account', 'Basic journal', 'Weekly report'], current: true, color: 'rgba(255,255,255,0.1)' },
-                { name: 'Pro', price: '$9/mo', features: ['Unlimited accounts', 'AI coaching', 'Monthly report', 'Priority support'], current: false, color: 'rgba(0,204,119,0.1)' },
+                { name: 'Free Trial', price: '$0/mo', features: ['15-day trial', 'Pre-Trade Gate', 'Trade Journal', 'Weekly AI Report', 'Live Prices'], current: !profile?.is_pro, color: 'rgba(255,255,255,0.04)' },
+                { name: 'Pro', price: '$9/mo', features: ['Everything in Trial', 'Unlimited trades', 'Monthly AI Report', 'Priority support', 'CSV Export'], current: profile?.is_pro, color: 'rgba(0,204,119,0.06)' },
               ].map(plan => (
-                <div key={plan.name} style={{ padding: 20, background: plan.color, border: `1px solid ${plan.current ? 'rgba(255,255,255,0.1)' : 'rgba(0,204,119,0.3)'}`, borderRadius: 12 }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: plan.current ? '#fff' : '#00cc77', marginBottom: 4 }}>{plan.name}</div>
+                <div key={plan.name} style={{ padding: 20, background: plan.color, border: plan.current ? '1px solid rgba(0,204,119,0.3)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 12, position: 'relative' }}>
+                  {plan.current && <div style={{ position: 'absolute', top: 10, right: 10, fontSize: 9, fontWeight: 700, color: '#000', background: '#00cc77', padding: '2px 8px', borderRadius: 10 }}>CURRENT</div>}
+                  <div style={{ fontSize: 16, fontWeight: 800, color: plan.current ? '#00cc77' : '#fff', marginBottom: 4 }}>{plan.name}</div>
                   <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'JetBrains Mono', color: '#fff', marginBottom: 12 }}>{plan.price}</div>
                   {plan.features.map(f => (
-                    <div key={f} style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>✓ {f}</div>
+                    <div key={f} style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>✓ {f}</div>
                   ))}
-                  {plan.current ? (
-                    <div style={{ marginTop: 16, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>CURRENT PLAN</div>
-                  ) : (
-                    <button style={{ ...btn, marginTop: 16, width: '100%' }}>Upgrade to Pro</button>
+                  {!profile?.is_pro && plan.name === 'Pro' && (
+                    <button onClick={() => window.location.href = '/upgrade'} style={{ marginTop: 16, width: '100%', padding: '10px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 8, color: '#000', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>Upgrade Now</button>
                   )}
                 </div>
               ))}
