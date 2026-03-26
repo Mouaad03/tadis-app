@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
           custom: { user_id: userId },
         },
         product_options: {
-          redirect_url: 'http://localhost:3000/dashboard?upgraded=true',
+          redirect_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tadis-app-coral.vercel.app'}/dashboard?upgraded=true`,
         },
       },
       relationships: {
