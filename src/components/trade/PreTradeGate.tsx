@@ -163,7 +163,7 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
   const checked = checklist.filter(c => c.checked).length
   const allOk = checklist.length > 0 && checked === checklist.length
   const blocked = !allOk || mood < 3 || !pair || !dir || !strategy || timer > 0 || todayTrades.length >= (profile?.max_daily_trades || 5)
-  const isRTL = lang === 'ar'
+  const isRTL = false
 
   async function enterTrade() {
     if (blocked || !pair || !dir) return

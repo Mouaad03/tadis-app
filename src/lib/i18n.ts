@@ -1,7 +1,7 @@
 // TRADIS — Translations
 // 4 languages: English, French, Arabic, Spanish
 
-export type Lang = 'en' | 'fr' | 'es'
+export type Lang = 'en' | 'fr' | 'ar' | 'es' | 'es'
 
 export const translations = {
   en: {
@@ -48,7 +48,7 @@ export const translations = {
     // Warnings
     selectPair: '⚠ Select a pair',
     selectDirection: '⚠ Select direction (BUY/SELL)',
-    selectStrategy: '⚠ Select a strategy',
+    selectStrategyWarning: '⚠ Select a strategy',
     conditionsMissing: '⚠ conditions missing',
     badMood: '⚠ Mental state not good — revenge trade risk',
     selectMood: '⚠ Select your mental state',
@@ -137,7 +137,7 @@ export const translations = {
     refresh: 'Actualiser',
     selectPair: '⚠ Choisissez une paire',
     selectDirection: '⚠ Choisissez la direction (BUY/SELL)',
-    selectStrategy: '⚠ Choisissez une stratégie',
+    selectStrategyWarning: '⚠ Choisissez une stratégie',
     conditionsMissing: '⚠ conditions manquantes',
     badMood: '⚠ État mental insuffisant — risque de revenge trade',
     selectMood: '⚠ Choisissez votre état mental',
@@ -222,7 +222,7 @@ export const translations = {
     refresh: 'Actualizar',
     selectPair: '⚠ Selecciona un par',
     selectDirection: '⚠ Selecciona dirección (COMPRA/VENTA)',
-    selectStrategy: '⚠ Selecciona una estrategia',
+    selectStrategyWarning: '⚠ Selecciona una estrategia',
     conditionsMissing: '⚠ condiciones pendientes',
     badMood: '⚠ Estado mental no óptimo — riesgo de operación vengativa',
     selectMood: '⚠ Selecciona tu estado mental',
@@ -284,6 +284,6 @@ export function setLang(lang: Lang) {
 }
 
 export function t(key: keyof typeof translations.en, lang: Lang): string {
-  const safeLang = (['en','fr','es'].includes(lang) ? lang : 'en') as Lang
+  const safeLang: keyof typeof translations = ['en', 'fr', 'es'].includes(lang as string) ? (lang as keyof typeof translations) : 'en'
   return (translations[safeLang] as any)?.[key] || translations.en[key] || key
 }

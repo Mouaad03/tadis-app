@@ -155,8 +155,6 @@ const LANGS = {
 
 type LangKey = keyof typeof LANGS
 
-type LangKey = keyof typeof LANGS
-
 // ─── ZELLA-STYLE MOCKUP DEMO ────────────────────────────────────────────────
 const HEATMAP_DATA = [
   [0,0,0,1,0,1,1],

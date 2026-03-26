@@ -164,7 +164,7 @@ export default function Dashboard() {
       <div style={{ padding: '16px 24px' }}>
         {tab === 'pre-trade' && <PreTradeGate profile={profile} todayTrades={todayTrades} onTradeAdded={() => loadTodayTrades()} />}
         {tab === 'journal' && <TradeJournal userId={profile?.id} profile={profile} lang={lang} demoTrades={isDemo ? demoTrades : undefined} />}
-        {tab === 'weekly' && <WeeklyReport userId={profile?.id} profile={profile} lang={lang} demoTrades={isDemo ? demoTrades : undefined} />}
+        {tab === 'weekly' && <WeeklyReport userId={profile?.id} profile={profile} demoTrades={isDemo ? demoTrades : undefined} />}
       </div>
     </div>
   )

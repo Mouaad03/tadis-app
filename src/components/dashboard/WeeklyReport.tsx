@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react'
 import { getLang } from '@/lib/i18n'
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts'
 
-interface Props { userId?: string; profile?: any; lang?: string; demoTrades?: any[] }
+interface Props { userId?: string; profile?: any; demoTrades?: any[] }
 
-export default function WeeklyReport({ userId, profile, lang, demoTrades }: Props) {
+export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
   const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly')
   const [report, setReport] = useState('')
   const [stats, setStats] = useState<any>(null)
@@ -32,7 +32,7 @@ export default function WeeklyReport({ userId, profile, lang, demoTrades }: Prop
       // Monthly always shows list first
       if (period === 'monthly') return
       // Check session cache first
-      const startD = period === 'monthly' ? new Date().getFullYear() + '-' + String(new Date().getMonth()+1).padStart(2,'0') : (() => { const s = new Date(); s.setDate(s.getDate()-s.getDay()); return s.toISOString().split('T')[0] })()
+      const startD = (() => { const s = new Date(); s.setDate(s.getDate()-s.getDay()); return s.toISOString().split('T')[0] })()
       const cacheKey = 'tradis_report_' + userId + '_' + period + '_' + startD
       const cached = sessionStorage.getItem(cacheKey)
       if (cached) {
