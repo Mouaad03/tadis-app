@@ -32,8 +32,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
   const [selected, setSelected] = useState<any>(null)
   const [trades, setTrades] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
-  const [lang, setLang] = useState('en')
+    const [lang, setLang] = useState('en')
 
   const l = LABELS[lang] || LABELS.en
   const isRTL = lang === 'ar'
@@ -92,18 +91,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
     else setTrades(demoTrades)
   }
 
-  async function generateReport() {
-    if (!userId) return
-    setGenerating(true)
-    try {
-      const res = await fetch('/api/weekly-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ period }) })
-      const data = await res.json()
-      if (data.report) {
-        await loadReports()
-      }
-    } catch(e) { console.error(e) }
-    setGenerating(false)
-  }
+  
 
   const card: React.CSSProperties = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16, marginBottom: 14 }
 
@@ -275,12 +263,7 @@ export default function WeeklyReport({ userId, profile, demoTrades }: Props) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>{l.history}</div>
-            {!demoTrades && (
-              <button onClick={generateReport} disabled={generating} style={{ padding: '8px 16px', background: generating ? 'rgba(0,204,119,0.3)' : 'rgba(0,204,119,0.1)', border: '1px solid rgba(0,204,119,0.3)', borderRadius: 8, color: '#00cc77', fontFamily: 'Syne', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-                {generating ? '⏳ ' + l.generating : '+ ' + l.generate}
-              </button>
-            )}
-          </div>
+                      </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading...</div>
