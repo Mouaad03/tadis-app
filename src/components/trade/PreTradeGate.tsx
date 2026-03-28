@@ -13,7 +13,7 @@ const PAIRS: Record<string, string[]> = {
 const DEFAULT_STRATEGIES = ['Structure Break + Retest','Order Block','Fair Value Gap','Trend Continuation','Support / Resistance','Liquidity Sweep','Fibonacci Retracement']
 const CHECKLIST_KEY = 'tds_checklist_v4'
 const STRATEGIES_KEY = 'tds_strategies_v4'
-interface CheckItem { id: string; text: string; tag: string; checked: boolean }
+interface CheckItem { id: string; text: string; tag: string; category?: string; checked: boolean }
 const DEFAULT_CHECKLIST: CheckItem[] = [
   { id: '1', text: 'SL behind 15min or 1H structure — not 5min', tag: 'RISK', checked: false },
   { id: '2', text: 'R:R minimum 1:1.5', tag: 'RISK', checked: false },
@@ -123,7 +123,7 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
     await supabase.from('checklist_items').delete().eq('user_id', user.id)
     if (items.length > 0) {
       await supabase.from('checklist_items').insert(items.map((item, i) => ({
-        user_id: user.id, text: item.text, category: item.category || 'CUSTOM', is_active: true, order_index: i
+        user_id: user.id, text: item.text, category: item.tag || 'CUSTOM', is_active: true, order_index: i
       })))
     }
   }
