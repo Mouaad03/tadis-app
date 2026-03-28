@@ -147,11 +147,11 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
   }
   useEffect(() => {
     // Check localStorage first for persistent timer
-    const saved = localStorage.getItem('tradis_revenge_end')
+    const saved = localStorage.getItem('tradis_revenge_end_' + (profile?.id || 'guest'))
     if (saved) {
       const left = Math.round((parseInt(saved) - Date.now()) / 1000)
       if (left > 0) { startTimer(left); return }
-      else localStorage.removeItem('tradis_revenge_end')
+      else localStorage.removeItem('tradis_revenge_end_' + (profile?.id || 'guest'))
     }
     const t = todayTrades[0]
     if (t?.result === 'loss') {
@@ -200,12 +200,12 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
   function startTimer(secs: number) {
     clearInterval(timerRef.current)
     const endTime = Date.now() + Math.round(secs) * 1000
-    localStorage.setItem('tradis_revenge_end', endTime.toString())
+    localStorage.setItem('tradis_revenge_end_' + (profile?.id || 'guest'), endTime.toString())
     const remaining = Math.round((endTime - Date.now()) / 1000)
     setTimer(remaining)
     timerRef.current = setInterval(() => {
       const left = Math.round((endTime - Date.now()) / 1000)
-      if (left <= 0) { clearInterval(timerRef.current); setTimer(0); localStorage.removeItem('tradis_revenge_end') }
+      if (left <= 0) { clearInterval(timerRef.current); setTimer(0); localStorage.removeItem('tradis_revenge_end_' + (profile?.id || 'guest')) }
       else setTimer(left)
     }, 1000)
   }
@@ -326,7 +326,7 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
         <div style={{ background: 'rgba(255,68,102,0.06)', border: '1px solid rgba(255,68,102,0.2)', borderRadius: 12, padding: 20, textAlign: 'center', marginBottom: 16 }}>
           <div style={{ fontSize: 44, fontWeight: 800, color: '#ff4466', fontFamily: 'JetBrains Mono' }}>{tm}:{ts}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,68,102,0.7)', marginTop: 4, letterSpacing: 1 }}>REVENGE COOLDOWN</div>
-          <button onClick={() => { clearInterval(timerRef.current); setTimer(0); localStorage.removeItem('tradis_revenge_end') }} style={{ marginTop: 8, background: 'none', border: '1px solid rgba(255,68,102,0.3)', borderRadius: 7, color: 'rgba(255,68,102,0.7)', padding: '5px 12px', cursor: 'pointer', fontSize: 12 }}>Skip</button>
+          <button onClick={() => { clearInterval(timerRef.current); setTimer(0); localStorage.removeItem('tradis_revenge_end_' + (profile?.id || 'guest')) }} style={{ marginTop: 8, background: 'none', border: '1px solid rgba(255,68,102,0.3)', borderRadius: 7, color: 'rgba(255,68,102,0.7)', padding: '5px 12px', cursor: 'pointer', fontSize: 12 }}>Skip</button>
         </div>
       )}
 
