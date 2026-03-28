@@ -111,20 +111,20 @@ export function checkDisciplineAlerts(todayTrades: any[], profile: any) {
   const revenges = todayTrades.filter((t: any) => t.is_revenge)
 
   if (totalPnL < -(balance * 0.03))
-    notify({ type: 'danger', title: 'Daily Loss Limit!', message: `Khsart $${Math.abs(totalPnL).toFixed(0)} (${((Math.abs(totalPnL)/balance)*100).toFixed(1)}%). Wqef daba o rj3 ghedda.`, duration: 0 })
+    notify({ type: 'danger', title: 'Daily Loss Limit!', message: `You lost ${Math.abs(totalPnL).toFixed(0)} (${((Math.abs(totalPnL)/balance)*100).toFixed(1)}% of balance). Stop trading today and come back tomorrow.`, duration: 0 })
 
   if (revenges.length > 0)
-    notify({ type: 'danger', title: 'Revenge Trade!', message: `Dkhelt trade ba3d loss. Sber o rj3 l strategy dyalek.`, duration: 8000 })
+    notify({ type: 'danger', title: 'Revenge Trade Detected!', message: `You entered a trade right after a loss. Wait for the cooldown and stick to your strategy.`, duration: 8000 })
 
   if (todayTrades.length === 3)
-    notify({ type: 'warning', title: 'Overtrading Warning', message: `3 trades f had lyum. Fker mezyan 9bal trade jdid.`, duration: 7000 })
+    notify({ type: 'warning', title: 'Overtrading Warning', message: `You have placed 3 trades today. Think carefully before entering a new one.`, duration: 7000 })
 
   if (todayTrades.length >= maxDailyTrades)
-    notify({ type: 'danger', title: 'Daily Limit Reached!', message: `Wslti l ${maxDailyTrades} trades — wqef hna.`, duration: 0 })
+    notify({ type: 'danger', title: 'Daily Limit Reached!', message: `You reached your daily limit of ${maxDailyTrades} trades — stop here for today.`, duration: 0 })
 
   const lastThree = todayTrades.slice(0, 3)
   if (lastThree.length === 3 && lastThree.every((t: any) => t.result === 'win'))
-    notify({ type: 'success', title: 'Win Streak x3! 🔥', message: `3 wins f saf! Zid discipline — matkbarch lot size.`, duration: 6000 })
+    notify({ type: 'success', title: 'Win Streak x3! 🔥', message: `3 consecutive wins! Stay disciplined — do not increase your lot size out of excitement.`, duration: 6000 })
 }
 
 export function showUpdateNotif(version: string, changes: string) {
