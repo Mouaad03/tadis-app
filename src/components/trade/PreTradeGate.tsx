@@ -97,7 +97,7 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
     const supabase = createClient()
     const { data } = await supabase.from('checklist_items').select('*').eq('user_id', userId).eq('is_active', true).order('order_index')
     if (data && data.length > 0) {
-      setChecklist(data.map((d: any) => ({ id: d.id, text: d.text, checked: false, category: d.category || 'CUSTOM' })))
+      setChecklist(data.map((d: any) => ({ id: d.id, text: d.text, checked: false, tag: d.category || 'CUSTOM', category: d.category || 'CUSTOM' })))
     } else {
       setChecklist(DEFAULT_CHECKLIST)
     }
