@@ -35,6 +35,34 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
+
+  // Input validation
+  const VALID_PAIRS = ['EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','NZDUSD','USDCAD','XAUUSD','XAGUSD','BTCUSD','ETHUSD','SP500','US100','US30','DAX','FTSE','CAC40','GBPJPY','EURJPY','AUDJPY','USOIL','UKOIL']
+  const VALID_DIRECTIONS = ['BUY', 'SELL']
+  const VALID_RESULTS = ['win', 'loss', 'breakeven']
+
+  if (!body.pair || !VALID_PAIRS.includes(body.pair.toUpperCase())) {
+    return NextResponse.json({ error: 'Invalid pair' }, { status: 400 })
+  }
+  if (!body.direction || !VALID_DIRECTIONS.includes(body.direction)) {
+    return NextResponse.json({ error: 'Invalid direction' }, { status: 400 })
+  }
+  if (body.result && !VALID_RESULTS.includes(body.result)) {
+    return NextResponse.json({ error: 'Invalid result' }, { status: 400 })
+  }
+  if (body.pnl !== undefined && (isNaN(body.pnl) || Math.abs(body.pnl) > 1000000)) {
+    return NextResponse.json({ error: 'Invalid PnL value' }, { status: 400 })
+  }
+  if (body.lot_size !== undefined && (isNaN(body.lot_size) || body.lot_size < 0 || body.lot_size > 1000)) {
+    return NextResponse.json({ error: 'Invalid lot size' }, { status: 400 })
+  }
+  if (body.notes && typeof body.notes === 'string') {
+    body.notes = body.notes.slice(0, 1000).replace(/<[^>]*>/g, '')
+  }
+  if (body.strategy && typeof body.strategy === 'string') {
+    body.strategy = body.strategy.slice(0, 100).replace(/<[^>]*>/g, '')
+  }
+
   const today = body.date || new Date().toISOString().split('T')[0]
 
   const { data: existing } = await supabase.from('trades').select('id').eq('user_id', user.id).eq('date', today)
