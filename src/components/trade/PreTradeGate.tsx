@@ -15,11 +15,11 @@ const CHECKLIST_KEY = 'tds_checklist_v4'
 const STRATEGIES_KEY = 'tds_strategies_v4'
 interface CheckItem { id: string; text: string; tag: string; checked: boolean }
 const DEFAULT_CHECKLIST: CheckItem[] = [
-  { id: '1', text: 'SL wara structure dyal 15min wela 1H', tag: 'RISK', checked: false },
-  { id: '2', text: 'R:R 1:1.5 minimum', tag: 'RISK', checked: false },
-  { id: '3', text: 'Trend clair f 4H wela Daily', tag: 'STRATEGY', checked: false },
-  { id: '4', text: 'Kayna setup wa9t7a — machi feeling', tag: 'STRATEGY', checked: false },
-  { id: '5', text: 'Ma3ndiش khasara kbira f had ljilsa', tag: 'PSYCH', checked: false },
+  { id: '1', text: 'SL behind 15min or 1H structure — not 5min', tag: 'RISK', checked: false },
+  { id: '2', text: 'R:R minimum 1:1.5', tag: 'RISK', checked: false },
+  { id: '3', text: 'Clear trend on 4H or Daily', tag: 'STRATEGY', checked: false },
+  { id: '4', text: 'Real setup — not based on feelings', tag: 'STRATEGY', checked: false },
+  { id: '5', text: 'No big loss in this session', tag: 'PSYCH', checked: false },
 ]
 const TAG_CLR: Record<string, [string, string]> = {
   RISK: ['rgba(255,68,102,0.12)', '#ff4466'],
