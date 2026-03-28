@@ -118,10 +118,12 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
     if (!profile?.id) { localStorage.setItem(CHECKLIST_KEY, JSON.stringify(items)); return }
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
-    await supabase.from('checklist_items').delete().eq('user_id', profile.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || user.id !== profile.id) return
+    await supabase.from('checklist_items').delete().eq('user_id', user.id)
     if (items.length > 0) {
       await supabase.from('checklist_items').insert(items.map((item, i) => ({
-        user_id: profile.id, text: item.text, category: item.category || 'CUSTOM', is_active: true, order_index: i
+        user_id: user.id, text: item.text, category: item.category || 'CUSTOM', is_active: true, order_index: i
       })))
     }
   }
@@ -130,14 +132,18 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
     if (!profile?.id) return
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
-    await supabase.from('user_strategies').insert({ user_id: profile.id, name })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || user.id !== profile.id) return
+    await supabase.from('user_strategies').insert({ user_id: user.id, name })
   }
 
   async function deleteStrategyFromDB(name: string) {
     if (!profile?.id) return
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
-    await supabase.from('user_strategies').delete().eq('user_id', profile.id).eq('name', name)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user || user.id !== profile.id) return
+    await supabase.from('user_strategies').delete().eq('user_id', user.id).eq('name', name)
   }
   useEffect(() => {
     // Check localStorage first for persistent timer
