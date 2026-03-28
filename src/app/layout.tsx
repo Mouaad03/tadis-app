@@ -10,12 +10,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PYLJ9D8F4Z" />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-BNSRM3R6PM" />
         <Script id="ga-init" dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-PYLJ9D8F4Z');
+          gtag('config', 'G-BNSRM3R6PM');
         `}} />
       </head>
       <body style={{ margin: 0, padding: 0, background: '#0a0a0f' }}>
