@@ -695,7 +695,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, marginBottom: 48 }}>
             <div>
-              <img src="/logo-footer.jpgalt="TRADIS Trading Discipline System" alt="TRADIS" style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: 16 }} />
+              <img src="/logo-footer.jpg" alt="TRADIS Trading Discipline System" style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: 16 }} />
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', lineHeight: 1.8, maxWidth: 320 }}>
                 Trading involves substantial risk and is not appropriate for everyone. Only risk capital should be used. Testimonials may not be representative of other users and are not a guarantee of future performance.
               </p>
