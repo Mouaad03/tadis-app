@@ -403,6 +403,7 @@ function MockupDemo() {
 export default function LandingPage() {
   const [lang, setLangState] = useState<LangKey>('en')
   const [langOpen, setLangOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const c = LANGS[lang]
@@ -432,6 +433,8 @@ export default function LandingPage() {
         .fade-in { animation: fadeUp .6s ease forwards; opacity: 0; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .card-hover { transition: transform .2s, border-color .2s; }
+        @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-nav { display: flex !important; } }
+        @media (min-width: 769px) { .mobile-nav { display: none !important; } .desktop-nav { display: flex !important; } }
         .card-hover:hover { transform: translateY(-4px); border-color: #00ff8844 !important; }
         .btn-glow { transition: all .2s; }
         .btn-glow:hover { box-shadow: 0 0 24px #00ff8844; }
@@ -447,19 +450,24 @@ export default function LandingPage() {
 
       {/* NAV */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: '#000000', borderBottom: '1px solid #1a1a28', padding: '0 24px' }}>
-        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '80px', padding: '0 24px' }}>
-          <div className="logo-wrap" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ padding: 0, marginRight: 'auto' }}>
-            <img src="/logo-nav.jpg" alt="TRADIS" style={{ height: '56px', width: 'auto', objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '72px', padding: '0 8px' }}>
+          
+          {/* Logo */}
+          <div className="logo-wrap" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ padding: 0, marginRight: 'auto', flexShrink: 0 }}>
+            <img src="/logo-nav.jpg" alt="TRADIS" style={{ height: '48px', width: 'auto', objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+
+          {/* Desktop nav links */}
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
             {c.nav.map(n => <a key={n} className="nav-link" href={`#${n.toLowerCase().replace(/\s/g,'-')}`}>{n}</a>)}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
+
+          {/* Desktop right */}
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
             <div ref={langRef} style={{ position: 'relative' }}>
-              <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-                <span style={{ fontSize: '16px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
+              <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+                <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
                 <span>{lang.toUpperCase()}</span>
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)' }}>{langOpen ? '▲' : '▼'}</span>
               </button>
               {langOpen && (
                 <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', minWidth: '160px', zIndex: 300 }}>
@@ -473,10 +481,50 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            <button onClick={() => router.push('/auth?mode=login')} style={{ padding: '8px 18px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Syne', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>{c.login}</button>
-            <button onClick={() => router.push('/auth?mode=register')} style={{ padding: '10px 24px', background: 'linear-gradient(135deg, #00ff88, #00ccaa)', border: 'none', borderRadius: '8px', color: '#000000', fontFamily: 'Syne', fontWeight: 800, fontSize: '14px', cursor: 'pointer', letterSpacing: '0.5px', transition: 'all .2s', boxShadow: '0 0 20px #00ff8844' }} onMouseEnter={e => { (e.target as HTMLElement).style.boxShadow = '0 0 32px #00ff8888'; (e.target as HTMLElement).style.transform = 'scale(1.04)' }} onMouseLeave={e => { (e.target as HTMLElement).style.boxShadow = '0 0 20px #00ff8844'; (e.target as HTMLElement).style.transform = 'scale(1)' }}>Get Started</button>
+            <button onClick={() => router.push('/auth?mode=login')} style={{ padding: '8px 16px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Syne', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>{c.login}</button>
+            <button onClick={() => router.push('/auth?mode=register')} style={{ padding: '9px 20px', background: 'linear-gradient(135deg, #00ff88, #00ccaa)', border: 'none', borderRadius: '8px', color: '#000000', fontFamily: 'Syne', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>Get Started</button>
+          </div>
+
+          {/* Mobile right — lang + hamburger */}
+          <div className="mobile-nav" style={{ display: 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+            <div ref={langRef} style={{ position: 'relative' }}>
+              <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+                <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
+              </button>
+              {langOpen && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', minWidth: '160px', zIndex: 300 }}>
+                  {(['en','fr','ar','es'] as LangKey[]).map(l => (
+                    <button key={l} onClick={() => { changeLang(l); setLangOpen(false) }} style={{ width: '100%', padding: '12px 16px', background: lang === l ? 'rgba(255,255,255,0.07)' : 'none', border: 'none', color: lang === l ? '#fff' : 'rgba(255,255,255,0.55)', fontFamily: 'Syne', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '16px' }}>{l === 'en' ? '🇬🇧' : l === 'fr' ? '🇫🇷' : l === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
+                      <span>{l === 'en' ? 'English' : l === 'fr' ? 'Français' : l === 'ar' ? 'العربية' : 'Español'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+              <span style={{ width: '18px', height: '2px', background: menuOpen ? '#00ff88' : '#fff', borderRadius: '2px', transition: 'all .2s', transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
+              <span style={{ width: '18px', height: '2px', background: menuOpen ? 'transparent' : '#fff', borderRadius: '2px', transition: 'all .2s' }} />
+              <span style={{ width: '18px', height: '2px', background: menuOpen ? '#00ff88' : '#fff', borderRadius: '2px', transition: 'all .2s', transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <div className="mobile-nav" style={{ display: 'block', background: '#080810', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '16px 24px' }}>
+            {c.nav.map(n => (
+              <a key={n} href={`#${n.toLowerCase().replace(/\s/g,'-')}`} onClick={() => setMenuOpen(false)}
+                style={{ display: 'block', padding: '12px 0', fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                {n}
+              </a>
+            ))}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+              <button onClick={() => { router.push('/auth?mode=login'); setMenuOpen(false) }} style={{ flex: 1, padding: '11px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff', fontFamily: 'Syne', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>{c.login}</button>
+              <button onClick={() => { router.push('/auth?mode=register'); setMenuOpen(false) }} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: '8px', color: '#000', fontFamily: 'Syne', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>Get Started</button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
