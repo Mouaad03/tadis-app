@@ -68,7 +68,24 @@ function DashboardContent() {
       }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth'); return }
-      const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      let { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      
+      // Auto-create profile if missing
+      if (!prof) {
+        const { data: newProf } = await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.username || '',
+          trial_start_date: new Date().toISOString(),
+          is_pro: false,
+          onboarding_done: false,
+          account_balance: 0,
+          risk_percent: 2,
+          max_daily_trades: 10,
+        }).select().single()
+        prof = newProf
+      }
+      
       setProfile(prof)
       if (prof && !prof.onboarding_done && !isDemo) setShowOnboarding(true)
       await loadTodayTrades(user.id, prof)
