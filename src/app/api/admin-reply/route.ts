@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'TRADIS Support <onboarding@resend.dev>',
+      from: 'TRADIS Support <support@tradis.live>',
       to: 'mouaadboumaaza0@gmail.com',
       subject: `Re: ${subject}`,
       html: `<h2>Reply from TRADIS Support</h2><p>Hi ${name},</p><p>${reply}</p><br><p>Best regards,<br>TRADIS Support Team<br>${customer_id ? `Your ID: ${customer_id}` : ''}</p>`,

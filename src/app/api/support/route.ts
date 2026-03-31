@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'TRADIS Support <onboarding@resend.dev>',
+      from: 'TRADIS Support <support@tradis.live>',
       to: 'mouaadboumaaza0@gmail.com',
       subject: `[${customer_id}] ${subject}`,
       html: `<h2>New Support Ticket</h2><p><b>Customer ID:</b> ${customer_id}</p><p><b>Name:</b> ${full_name}</p><p><b>Email:</b> ${email}</p><p><b>Subject:</b> ${subject}</p><p><b>Message:</b></p><p>${message}</p>${screenshot_url ? `<p><b>Screenshot:</b></p><img src='${screenshot_url}' style='max-width:600px;border-radius:8px;margin-top:8px;' /><p><a href='${screenshot_url}'>View screenshot</a></p>` : ''}`,
