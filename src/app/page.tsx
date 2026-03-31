@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 const LANGS = {
@@ -410,7 +410,7 @@ export default function LandingPage() {
   const c = LANGS[lang]
   const isRTL = lang === 'ar'
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768)
     checkMobile()
     window.addEventListener('resize', checkMobile)
