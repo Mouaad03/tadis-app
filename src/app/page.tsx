@@ -454,6 +454,8 @@ export default function LandingPage() {
         .logo-text { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 3px; color: #e8e8f0; transition: all .25s; }
         .nav-link { color: #888890; font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: 0.5px; transition: color .2s; }
         .nav-link:hover { color: #e8e8f0; }
+        @media screen and (max-width: 768px) { .hide-mobile { display: none !important; } .show-mobile { display: flex !important; } }
+        @media screen and (min-width: 769px) { .hide-mobile { display: flex !important; } .show-mobile { display: none !important; } }
       ` }} />
 
       {/* NAV */}
@@ -466,12 +468,12 @@ export default function LandingPage() {
           </div>
 
           {/* Desktop nav links */}
-          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', flexWrap: 'nowrap' }} suppressHydrationWarning>
+          <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', flexWrap: 'nowrap' }}>
             {c.nav.map(n => <a key={n} className="nav-link" href={`#${n.toLowerCase().replace(/\s/g,'-')}`}>{n}</a>)}
           </div>
 
           {/* Desktop right */}
-          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+          <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
             <div ref={langRef} style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
                 <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
@@ -494,7 +496,7 @@ export default function LandingPage() {
           </div>
 
           {/* Mobile right — lang + hamburger */}
-          <div style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }} suppressHydrationWarning>
+          <div className="show-mobile" style={{ display: 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
             <div ref={langRef} style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
                 <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
