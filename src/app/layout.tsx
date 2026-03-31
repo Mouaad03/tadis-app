@@ -6,6 +6,11 @@ import CookieBanner from '@/components/ui/CookieBanner'
 export const metadata: Metadata = {
   title: "TRADIS — Trading Discipline System",
   description: "Stop losing trades to your emotions. Pre-trade checklist, revenge cooldown timer, AI coaching reports. Try free 15 days.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+    shortcut: "/icon.png",
+  },
   verification: {
     google: "VDmlqOwQqNMdfK0gWrHrg3w9WIOUvfGR0DkL6y-9rFY",
   },
