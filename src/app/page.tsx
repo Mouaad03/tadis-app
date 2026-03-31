@@ -657,7 +657,7 @@ export default function LandingPage() {
 
       {/* WHY TRADIS */}
       <section style={{ padding: '120px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+        <div className="why-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
           <div>
             <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, letterSpacing: '1px', marginBottom: '24px' }}>WHY TRADIS</div>
             <h2 style={{ fontSize: 'clamp(28px,4vw,48px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '20px', lineHeight: 1.1 }}>Most traders lose<br /><span style={{ color: 'rgba(255,255,255,0.3)' }}>not because of strategy.</span></h2>
@@ -741,7 +741,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer style={{ borderTop: '1px solid #1a1a28', padding: '60px 48px 40px', background: '#000' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 48 }}>
+          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 48 }}>
             <div>
               <img src="/logo-footer.jpg" alt="TRADIS Trading Discipline System" style={{ height: '80px', width: 'auto', objectFit: 'contain', marginBottom: 16 }} />
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', lineHeight: 1.8, maxWidth: 320 }}>
