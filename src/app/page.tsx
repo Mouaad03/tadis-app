@@ -418,13 +418,6 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
     const saved = localStorage.getItem('tradis_lang') as LangKey
     if (saved && LANGS[saved]) setLangState(saved)
     function handleClick(e: MouseEvent) {
