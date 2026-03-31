@@ -433,7 +433,7 @@ export default function LandingPage() {
         .fade-in { animation: fadeUp .6s ease forwards; opacity: 0; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .card-hover { transition: transform .2s, border-color .2s; }
-        @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-nav { display: flex !important; } }
+        @media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-nav { display: flex !important; } } @media (max-width: 768px) { nav .desktop-nav { display: none !important; } nav .mobile-nav { display: flex !important; } }
         @media (min-width: 769px) { .mobile-nav { display: none !important; } .desktop-nav { display: flex !important; } }
         .card-hover:hover { transform: translateY(-4px); border-color: #00ff8844 !important; }
         .btn-glow { transition: all .2s; }
@@ -458,7 +458,7 @@ export default function LandingPage() {
           </div>
 
           {/* Desktop nav links */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', flexWrap: 'nowrap' }} suppressHydrationWarning>
             {c.nav.map(n => <a key={n} className="nav-link" href={`#${n.toLowerCase().replace(/\s/g,'-')}`}>{n}</a>)}
           </div>
 
@@ -486,7 +486,7 @@ export default function LandingPage() {
           </div>
 
           {/* Mobile right — lang + hamburger */}
-          <div className="mobile-nav" style={{ display: 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+          <div className="mobile-nav" style={{ display: 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }} suppressHydrationWarning>
             <div ref={langRef} style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
                 <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
