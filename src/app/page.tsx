@@ -404,7 +404,6 @@ export default function LandingPage() {
   const [lang, setLangState] = useState<LangKey>('en')
   const [langOpen, setLangOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(true)
-  const [isMobile, setIsMobile] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
