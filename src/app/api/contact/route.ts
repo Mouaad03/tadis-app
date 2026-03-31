@@ -12,7 +12,10 @@ export async function POST(req: NextRequest) {
   const supabase = createClient()
   await supabase.from('contact_messages').insert({ name, email, message })
 
-  // Log resend response
+  // Send email via Resend
+  const resendKey = process.env.RESEND_API_KEY
+  const contactEmail = process.env.CONTACT_EMAIL
+
   const resendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
