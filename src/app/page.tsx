@@ -403,11 +403,19 @@ function MockupDemo() {
 export default function LandingPage() {
   const [lang, setLangState] = useState<LangKey>('en')
   const [langOpen, setLangOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const c = LANGS[lang]
   const isRTL = lang === 'ar'
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('tradis_lang') as LangKey
@@ -458,12 +466,12 @@ export default function LandingPage() {
           </div>
 
           {/* Desktop nav links */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', flexWrap: 'nowrap' }} suppressHydrationWarning>
+          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '32px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', flexWrap: 'nowrap' }} suppressHydrationWarning>
             {c.nav.map(n => <a key={n} className="nav-link" href={`#${n.toLowerCase().replace(/\s/g,'-')}`}>{n}</a>)}
           </div>
 
           {/* Desktop right */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+          <div style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
             <div ref={langRef} style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
                 <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
@@ -486,7 +494,7 @@ export default function LandingPage() {
           </div>
 
           {/* Mobile right — lang + hamburger */}
-          <div className="mobile-nav" style={{ display: 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }} suppressHydrationWarning>
+          <div style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', gap: '8px', marginLeft: 'auto' }} suppressHydrationWarning>
             <div ref={langRef} style={{ position: 'relative' }}>
               <button onClick={() => setLangOpen(!langOpen)} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ffffff', fontFamily: 'Syne', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
                 <span style={{ fontSize: '14px' }}>{lang === 'en' ? '🇬🇧' : lang === 'fr' ? '🇫🇷' : lang === 'ar' ? '🇸🇦' : '🇪🇸'}</span>
