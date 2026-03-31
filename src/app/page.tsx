@@ -460,7 +460,7 @@ export default function LandingPage() {
 
       {/* NAV */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: '#000000', borderBottom: '1px solid #1a1a28', padding: '0 24px' }}>
-        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '72px', padding: '0 8px' }}>
+        <div className='nav-inner' style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '72px', padding: '0 8px' }}>
           
           {/* Logo */}
           <div className="logo-wrap" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ padding: 0, marginRight: 'auto', flexShrink: 0 }}>
