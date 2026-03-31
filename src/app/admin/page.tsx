@@ -29,20 +29,7 @@ export default function AdminPanel() {
     if (data) setAllCustomers(data)
   }
 
-  async function loadMessages() {
-    const { createClient } = await import('@/lib/supabase')
-    const supabase = createClient()
-    const { data: tickets } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
-    const { data: contacts } = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false })
-    const all = [
-      ...(tickets || []).map((t: any) => ({ ...t, type: 'support' })),
-      ...(contacts || []).map((c: any) => ({ ...c, type: 'contact' }))
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    setMessages(all)
-    setUnread(all.filter((m: any) => !m.read_at).length)
-  }
-
-  async function markRead(msg: any) {
+async function markRead(msg: any) {
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
     const table = msg.type === 'support' ? 'support_tickets' : 'contact_messages'
@@ -55,38 +42,7 @@ export default function AdminPanel() {
     setReplyText('')
   }
 
-  async function sendReply() {
-    if (!replyText || !selectedMsg) return
-    setReplying(true)
-    const { createClient } = await import('@/lib/supabase')
-    const supabase = createClient()
-    const table = selectedMsg.type === 'support' ? 'support_tickets' : 'contact_messages'
-    await supabase.from(table).update({
-      reply: replyText,
-      status: 'replied',
-      replied_at: new Date().toISOString()
-    }).eq('id', selectedMsg.id)
-
-    // Send email reply
-    await fetch('/api/admin-reply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: selectedMsg.email,
-        name: selectedMsg.name || selectedMsg.full_name,
-        subject: selectedMsg.subject || 'Re: Your message to TRADIS',
-        reply: replyText,
-        customer_id: selectedMsg.customer_id || '',
-      })
-    })
-
-    setMessages(prev => prev.map(m => m.id === selectedMsg.id ? { ...m, status: 'replied', reply: replyText } : m))
-    setSelectedMsg((prev: any) => ({ ...prev, status: 'replied', reply: replyText }))
-    setReplyText('')
-    setReplying(false)
-  }
-
-  async function searchCustomer() {
+async function searchCustomer() {
     if (!search) return
     setLoading(true)
     setCustomer(null)
