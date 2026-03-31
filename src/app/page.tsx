@@ -254,11 +254,11 @@ function MockupDemo({ isMobile }: { isMobile: boolean }) {
                   <div style={{ fontSize: 11, fontWeight: 800, color: '#00ff88' }}>5/5</div>
                 </div>
                 {[
-                  ['SL wara structure dyal 15min', true, 'RISK'],
-                  ['R:R 1:1.5 minimum', true, 'RISK'],
-                  ['Trend clair f 4H wela Daily', true, 'STRATEGY'],
-                  ['Kayna setup wa9t7a — machi feeling', true, 'STRATEGY'],
-                  ['Ma3ndiش khasara kbira f had ljilsa', true, 'PSYCH'],
+                  ['SL is behind a structure (15min)', true, 'RISK'],
+                  ['R:R minimum 1:1.5', true, 'RISK'],
+                  ['Clear trend on 4H or Daily', true, 'STRATEGY'],
+                  ['Valid setup — not just a feeling', true, 'STRATEGY'],
+                  ['No major loss in this session', true, 'PSYCH'],
                 ].map(([text, checked, tag], i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                     <div style={{ width: 16, height: 16, borderRadius: 4, background: checked ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.05)', border: `1px solid ${checked ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#00ff88', flexShrink: 0 }}>{checked ? '✓' : ''}</div>
