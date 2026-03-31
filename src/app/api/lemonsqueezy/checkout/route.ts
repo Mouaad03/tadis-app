@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       attributes: {
         checkout_data: {
           email: profile?.email || userEmail || '',
-          name: profile?.full_name || '',
+          name: profile?.full_name || profile?.email?.split('@')[0] || 'TRADIS User',
           custom: { user_id: userId },
         },
         product_options: {
