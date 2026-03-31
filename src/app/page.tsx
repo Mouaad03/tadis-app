@@ -174,7 +174,7 @@ const CALENDAR_TRADES: Record<number, { pnl: number; trades: number; loss?: bool
   25: { pnl: 123, trades: 2 },
 }
 
-function MockupDemo() {
+function MockupDemo({ isMobile }: { isMobile: boolean }) {
   const [activeTab, setActiveTab] = useState<'pretrade' | 'journal' | 'report'>('pretrade')
 
   return (
@@ -641,7 +641,7 @@ export default function LandingPage() {
             <h2 style={{ fontSize: 'clamp(28px,5vw,48px)', fontWeight: 800, letterSpacing: '-2px', marginBottom: '12px' }}>Try it before you sign up</h2>
             <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.35)' }}>Interactive preview — no account needed</p>
           </div>
-          <MockupDemo />
+          <MockupDemo isMobile={isMobile} />
           <div style={{ textAlign: 'center', marginTop: 32 }}>
             <button onClick={() => router.push('/dashboard?demo=true')} style={{ padding: '16px 40px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 12, color: '#000', fontFamily: 'Syne', fontWeight: 800, fontSize: 16, cursor: 'pointer', letterSpacing: 0.5, marginBottom: 12 }}>
               🚀 Try Live Demo — No signup needed
