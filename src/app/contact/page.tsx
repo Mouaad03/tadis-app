@@ -8,6 +8,7 @@ export default function ContactPage() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const input: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', padding: '12px 14px', fontSize: 14, fontFamily: 'Syne, sans-serif', outline: 'none', boxSizing: 'border-box' }
 
@@ -45,9 +46,21 @@ export default function ContactPage() {
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 6, letterSpacing: 1 }}>MESSAGE</div>
               <textarea style={{ ...input, minHeight: 140, resize: 'vertical' }} value={message} onChange={e => setMessage(e.target.value)} placeholder="Your message..." />
             </div>
-            <button onClick={() => { if (name && email && message) setSent(true) }}
+            <button onClick={async () => {
+              if (!name || !email || !message) return
+              setLoading(true)
+              try {
+                await fetch('/api/contact', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name, email, message })
+                })
+                setSent(true)
+              } catch(e) {}
+              setLoading(false)
+            }}
               style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 10, color: '#000', fontFamily: 'Syne', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
-              Send Message
+              {loading ? 'Sending...' : 'Send Message'}
             </button>
             <div style={{ marginTop: 20, fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
               Or email us directly: <span style={{ color: '#00ff88' }}>support@tradis.app</span>
