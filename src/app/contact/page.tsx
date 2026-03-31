@@ -63,7 +63,7 @@ export default function ContactPage() {
               {loading ? 'Sending...' : 'Send Message'}
             </button>
             <div style={{ marginTop: 20, fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
-              Or email us directly: <span style={{ color: '#00ff88' }}>support@tradis.app</span>
+              Or email us directly: <span style={{ color: '#00ff88' }}>support@tradis.live</span>
             </div>
           </div>
         )}
