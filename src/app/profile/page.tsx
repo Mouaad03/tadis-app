@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [supportMessage, setSupportMessage] = useState('')
   const [supportSent, setSupportSent] = useState(false)
   const [supportLoading, setSupportLoading] = useState(false)
+  const [supportScreenshot, setSupportScreenshot] = useState<File | null>(null)
+  const [screenshotPreview, setScreenshotPreview] = useState('')
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvv, setCardCvv] = useState('')
@@ -254,11 +256,40 @@ export default function ProfilePage() {
                     placeholder="Describe your issue in detail..."
                     style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', padding: '10px 14px', fontSize: 14, fontFamily: 'Syne', outline: 'none', boxSizing: 'border-box', minHeight: 120, resize: 'vertical' }} />
                 </div>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>SCREENSHOT (OPTIONAL)</div>
+                  <label style={{ display: 'block', cursor: 'pointer' }}>
+                    <div style={{ border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 8, padding: '16px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+                      {screenshotPreview ? (
+                        <img src={screenshotPreview} style={{ maxHeight: 120, maxWidth: '100%', borderRadius: 6 }} />
+                      ) : '+ Add screenshot'}
+                    </div>
+                    <input type="file" accept="image/*" style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setSupportScreenshot(file)
+                          setScreenshotPreview(URL.createObjectURL(file))
+                        }
+                      }} />
+                  </label>
+                </div>
                 <button
                   onClick={async () => {
                     if (!supportSubject || !supportMessage) return
                     setSupportLoading(true)
                     try {
+                      let screenshotUrl = ''
+                      if (supportScreenshot) {
+                        const { createClient } = await import('@/lib/supabase')
+                        const supabase = createClient()
+                        const fileName = \`support/\${profile?.customer_id}_\${Date.now()}.\${supportScreenshot.name.split('.').pop()}\`
+                        const { data } = await supabase.storage.from('screenshots').upload(fileName, supportScreenshot)
+                        if (data) {
+                          const { data: urlData } = supabase.storage.from('screenshots').getPublicUrl(fileName)
+                          screenshotUrl = urlData.publicUrl
+                        }
+                      }
                       await fetch('/api/support', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -269,6 +300,7 @@ export default function ProfilePage() {
                           email: email,
                           subject: supportSubject,
                           message: supportMessage,
+                          screenshot_url: screenshotUrl,
                         })
                       })
                       setSupportSent(true)
