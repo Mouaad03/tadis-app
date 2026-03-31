@@ -519,6 +519,10 @@ export default function LandingPage() {
                 {n}
               </a>
             ))}
+            <a href="/dashboard?demo=true" onClick={() => setMenuOpen(false)}
+              style={{ display: 'block', padding: '12px 0', fontSize: '15px', fontWeight: 600, color: '#00ff88', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              🚀 Live Demo
+            </a>
             <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
               <button onClick={() => { router.push('/auth?mode=login'); setMenuOpen(false) }} style={{ flex: 1, padding: '11px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff', fontFamily: 'Syne', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>{c.login}</button>
               <button onClick={() => { router.push('/auth?mode=register'); setMenuOpen(false) }} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: '8px', color: '#000', fontFamily: 'Syne', fontWeight: 800, fontSize: '14px', cursor: 'pointer' }}>Get Started</button>
