@@ -15,6 +15,43 @@ import { Trade, Profile } from '@/types'
 
 type Tab = 'pre-trade' | 'journal' | 'weekly'
 
+
+function RotateOverlay() {
+  return (
+    <div style={{
+      display: 'none',
+      position: 'fixed',
+      inset: 0,
+      background: '#000000',
+      zIndex: 9999,
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '24px',
+    }} id="rotate-overlay">
+      <style>{`
+        @keyframes rotatePhone {
+          0% { transform: rotate(0deg); }
+          30% { transform: rotate(0deg); }
+          60% { transform: rotate(90deg); }
+          100% { transform: rotate(90deg); }
+        }
+        @media (max-width: 900px) and (orientation: portrait) {
+          #rotate-overlay { display: flex !important; }
+        }
+      `}</style>
+      <div style={{ fontSize: '72px', animation: 'rotatePhone 2s ease-in-out infinite' }}>📱</div>
+      <div style={{ color: '#ffffff', fontSize: '22px', fontWeight: 700, fontFamily: 'sans-serif', textAlign: 'center', padding: '0 40px' }}>
+        Rotate your phone
+      </div>
+      <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', textAlign: 'center', padding: '0 40px', lineHeight: 1.6, fontFamily: 'sans-serif' }}>
+        TRADIS is designed for landscape mode on mobile
+      </div>
+      <div style={{ width: '48px', height: '48px', border: '2px solid #00ff88', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>↻</div>
+    </div>
+  )
+}
+
 function DashboardContent() {
   const [tab, setTab] = useState<Tab>('pre-trade')
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -279,9 +316,12 @@ function AccountSwitcher({ accounts, active, onChange, onAdd }: any) {
 
 export default function Dashboard() {
   return (
+    <>
+    <RotateOverlay />
     <Suspense fallback={<div>Loading...</div>}>
       <DashboardContent />
     </Suspense>
+    </>
   )
 }
 
