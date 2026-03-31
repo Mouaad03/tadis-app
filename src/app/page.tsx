@@ -522,7 +522,7 @@ export default function LandingPage() {
 
         {/* Mobile menu dropdown */}
         {menuOpen && (
-          <div className="mobile-nav" style={{ display: 'block', background: '#080810', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '16px 24px' }}>
+          <div style={{ display: 'block', background: '#080810', borderTop: '1px solid rgba(255,255,255,0.07)', padding: '16px 24px' }}>
             {c.nav.map(n => (
               <a key={n} href={`#${n.toLowerCase().replace(/\s/g,'-')}`} onClick={() => setMenuOpen(false)}
                 style={{ display: 'block', padding: '12px 0', fontSize: '15px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
