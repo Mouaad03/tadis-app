@@ -12,11 +12,8 @@ export async function POST(req: NextRequest) {
   const supabase = createClient()
   await supabase.from('contact_messages').insert({ name, email, message })
 
-  // Send email via Resend
-  const resendKey = process.env.RESEND_API_KEY
-  const contactEmail = process.env.CONTACT_EMAIL
-
-  await fetch('https://api.resend.com/emails', {
+  // Log resend response
+  const resendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${resendKey}`,
@@ -30,6 +27,8 @@ export async function POST(req: NextRequest) {
       reply_to: email,
     }),
   })
+  const resendData = await resendRes.json()
+  console.log('Resend response:', JSON.stringify(resendData))
 
   return NextResponse.json({ success: true })
 }
