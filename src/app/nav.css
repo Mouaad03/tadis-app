@@ -1,0 +1,2 @@
+@media screen and (max-width: 768px) { .hide-mobile { display: none !important; } .show-mobile { display: flex !important; } }
+@media screen and (min-width: 769px) { .hide-mobile { display: flex !important; } .show-mobile { display: none !important; } }
