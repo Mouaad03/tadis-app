@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Tab = 'info' | 'security' | 'payment' | 'subscription'
+type Tab = 'info' | 'security' | 'payment' | 'subscription' | 'support'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -22,6 +22,10 @@ export default function ProfilePage() {
   const [newPwd, setNewPwd] = useState('')
   const [confirmPwd, setConfirmPwd] = useState('')
   const [showAddCard, setShowAddCard] = useState(false)
+  const [supportSubject, setSupportSubject] = useState('')
+  const [supportMessage, setSupportMessage] = useState('')
+  const [supportSent, setSupportSent] = useState(false)
+  const [supportLoading, setSupportLoading] = useState(false)
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvv, setCardCvv] = useState('')
@@ -91,6 +95,7 @@ export default function ProfilePage() {
     { id: 'security', label: '🔐 Email & Password' },
     { id: 'payment', label: '💳 Payment' },
     { id: 'subscription', label: '⭐ Subscription' },
+    { id: 'support', label: '🎧 Support' },
   ]
 
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'TR'
@@ -222,6 +227,62 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+        {tab === 'support' && (
+          <div style={{ padding: '24px' }}>
+            {supportSent ? (
+              <div style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', borderRadius: 12, padding: 24, textAlign: 'center' }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>✓</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#00ff88', marginBottom: 6 }}>Ticket submitted!</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>We'll get back to you within 24 hours.</div>
+                <div style={{ marginTop: 12, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Your ID: <span style={{ color: '#00ff88', fontWeight: 700 }}>{profile?.customer_id}</span></div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>YOUR CUSTOMER ID</div>
+                  <div style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', borderRadius: 8, padding: '10px 14px', fontSize: 14, fontWeight: 700, color: '#00ff88', letterSpacing: 2 }}>{profile?.customer_id || 'Loading...'}</div>
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>SUBJECT</div>
+                  <input value={supportSubject} onChange={e => setSupportSubject(e.target.value)}
+                    placeholder="Ex: Payment issue, Bug report..."
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', padding: '10px 14px', fontSize: 14, fontFamily: 'Syne', outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>MESSAGE</div>
+                  <textarea value={supportMessage} onChange={e => setSupportMessage(e.target.value)}
+                    placeholder="Describe your issue in detail..."
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', padding: '10px 14px', fontSize: 14, fontFamily: 'Syne', outline: 'none', boxSizing: 'border-box', minHeight: 120, resize: 'vertical' }} />
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!supportSubject || !supportMessage) return
+                    setSupportLoading(true)
+                    try {
+                      await fetch('/api/support', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          customer_id: profile?.customer_id,
+                          user_id: profile?.id,
+                          full_name: profile?.full_name || firstName + ' ' + lastName,
+                          email: email,
+                          subject: supportSubject,
+                          message: supportMessage,
+                        })
+                      })
+                      setSupportSent(true)
+                    } catch(e) {}
+                    setSupportLoading(false)
+                  }}
+                  style={{ width: '100%', padding: 14, background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 10, color: '#000', fontFamily: 'Syne', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
+                  {supportLoading ? 'Sending...' : 'Submit Ticket'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === 'subscription' && (
           <div style={card}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.2, marginBottom: 20 }}>SUBSCRIPTION PLAN</div>
