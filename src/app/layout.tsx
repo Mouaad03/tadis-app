@@ -1,5 +1,5 @@
-import './nav.css'
 import type { Metadata } from 'next'
+import './nav.css'
 import Script from 'next/script'
 import CookieBanner from '@/components/ui/CookieBanner'
 
