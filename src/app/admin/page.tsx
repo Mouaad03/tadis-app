@@ -14,17 +14,11 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(false)
   const [actionMsg, setActionMsg] = useState('')
   const [allCustomers, setAllCustomers] = useState<any[]>([])
-  const [view, setView] = useState<'customers' | 'inbox'>('customers')
-  const [messages, setMessages] = useState<any[]>([])
-  const [selectedMsg, setSelectedMsg] = useState<any>(null)
-  const [replyText, setReplyText] = useState('')
-  const [replying, setReplying] = useState(false)
-  const [unread, setUnread] = useState(0)
+
 
   useEffect(() => {
     if (authed) {
       loadAllCustomers()
-      loadMessages()
     }
   }, [authed])
 
@@ -160,15 +154,7 @@ export default function AdminPanel() {
       {/* Header */}
       <div style={{ background: '#000', borderBottom: '1px solid rgba(0,255,136,0.2)', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 16, fontWeight: 800, color: '#00ff88', letterSpacing: 3 }}>TRADIS ADMIN</div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button onClick={() => setView('customers')} style={{ background: view === 'customers' ? 'rgba(0,255,136,0.15)' : 'none', border: '1px solid rgba(0,255,136,0.3)', borderRadius: 8, color: '#00ff88', padding: '6px 16px', cursor: 'pointer', fontFamily: 'monospace', fontSize: 12 }}>
-            Users ({allCustomers.length})
-          </button>
-          <button onClick={() => { setView('inbox'); setSelectedMsg(null) }} style={{ background: view === 'inbox' ? 'rgba(0,255,136,0.15)' : 'none', border: '1px solid rgba(0,255,136,0.3)', borderRadius: 8, color: '#00ff88', padding: '6px 16px', cursor: 'pointer', fontFamily: 'monospace', fontSize: 12, position: 'relative' }}>
-            Inbox ({messages.length})
-            {unread > 0 && <span style={{ position: 'absolute', top: -6, right: -6, background: '#ff4466', color: '#fff', borderRadius: '50%', width: 18, height: 18, fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>{unread}</span>}
-          </button>
-        </div>
+<div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{allCustomers.length} total users</div>
       </div>
 
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
@@ -270,81 +256,8 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
-
-        {/* Inbox view */}
-        {view === 'inbox' && (
-          <div style={{ display: 'grid', gridTemplateColumns: selectedMsg ? '1fr 1.4fr' : '1fr', gap: 16 }}>
-            {/* Messages list */}
-            <div style={card}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 12 }}>ALL MESSAGES ({messages.length})</div>
-              {messages.length === 0 ? <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>No messages yet</div> : (
-                messages.map((msg: any) => (
-                  <div key={msg.id} onClick={() => markRead(msg)}
-                    style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', opacity: selectedMsg?.id === msg.id ? 1 : 0.85 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: msg.read_at ? '#fff' : '#00ff88' }}>
-                        {!msg.read_at && '● '}{msg.name || msg.full_name || 'Unknown'}
-                      </div>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 99, background: msg.type === 'support' ? 'rgba(0,204,255,0.15)' : 'rgba(255,170,0,0.15)', color: msg.type === 'support' ? '#00ccff' : '#ffaa00' }}>
-                          {msg.type === 'support' ? 'SUPPORT' : 'CONTACT'}
-                        </span>
-                        <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 99, background: msg.status === 'replied' ? 'rgba(0,255,136,0.15)' : 'rgba(255,170,0,0.15)', color: msg.status === 'replied' ? '#00ff88' : '#ffaa00' }}>
-                          {msg.status?.toUpperCase() || 'OPEN'}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 2 }}>{msg.subject || '(no subject)'}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>{new Date(msg.created_at).toLocaleString()}</div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Message detail + reply */}
-            {selectedMsg && (
-              <div style={card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#00ff88' }}>{selectedMsg.customer_id || 'Contact'}</div>
-                  <button onClick={() => setSelectedMsg(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 16 }}>✕</button>
-                </div>
-                <div style={{ marginBottom: 8 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>FROM: </span>
-                  <span style={{ fontSize: 12, color: '#fff' }}>{selectedMsg.name || selectedMsg.full_name} — {selectedMsg.email}</span>
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{selectedMsg.subject || '(no subject)'}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                  {selectedMsg.message}
-                </div>
-                {selectedMsg.screenshot_url && (
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>SCREENSHOT:</div>
-                    <a href={selectedMsg.screenshot_url} target="_blank" rel="noreferrer">
-                      <img src={selectedMsg.screenshot_url} style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)' }} />
-                    </a>
-                  </div>
-                )}
-                {selectedMsg.reply && (
-                  <div style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: 8, padding: 12, marginBottom: 12 }}>
-                    <div style={{ fontSize: 10, color: '#00ff88', marginBottom: 4 }}>YOUR REPLY:</div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{selectedMsg.reply}</div>
-                  </div>
-                )}
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>REPLY:</div>
-                <textarea value={replyText} onChange={e => setReplyText(e.target.value)}
-                  placeholder="Type your reply..."
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', padding: '10px 12px', fontSize: 12, fontFamily: 'monospace', outline: 'none', minHeight: 80, resize: 'vertical', boxSizing: 'border-box', marginBottom: 8 }} />
-                <button onClick={sendReply} disabled={replying || !replyText}
-                  style={{ width: '100%', padding: 10, background: replyText ? '#00ff88' : 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 8, color: replyText ? '#000' : '#555', fontFamily: 'monospace', fontWeight: 700, fontSize: 13, cursor: replyText ? 'pointer' : 'not-allowed' }}>
-                  {replying ? 'Sending...' : 'Send Reply'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* All customers list */}
-        {view === 'customers' && !customer && (
+        {!customer && (
           <div style={card}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 12 }}>ALL USERS ({allCustomers.length})</div>
             <div style={{ overflowX: 'auto' }}>
