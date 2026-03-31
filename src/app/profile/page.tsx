@@ -283,7 +283,7 @@ export default function ProfilePage() {
                       if (supportScreenshot) {
                         const { createClient } = await import('@/lib/supabase')
                         const supabase = createClient()
-                        const fileName = \`support/\${profile?.customer_id}_\${Date.now()}.\${supportScreenshot.name.split('.').pop()}\`
+                        const fileName = `support/${profile?.customer_id}_${Date.now()}.${supportScreenshot.name.split('.').pop()}`
                         const { data } = await supabase.storage.from('screenshots').upload(fileName, supportScreenshot)
                         if (data) {
                           const { data: urlData } = supabase.storage.from('screenshots').getPublicUrl(fileName)
