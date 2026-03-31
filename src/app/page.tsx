@@ -210,7 +210,7 @@ function MockupDemo() {
 
         {/* PRE-TRADE TAB */}
         {activeTab === 'pretrade' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             {/* Left: Pair + Calculator */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16 }}>
@@ -285,7 +285,7 @@ function MockupDemo() {
 
         {/* JOURNAL TAB */}
         {activeTab === 'journal' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             {/* Calendar */}
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
