@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       from: 'TRADIS Contact <onboarding@resend.dev>',
-      to: contactEmail,
+      to: 'mouaadboumaaza0@gmail.com',
       subject: `New message from ${name}`,
       html: `<h2>New Contact Message</h2><p><b>Name:</b> ${name}</p><p><b>Email:</b> ${email}</p><p><b>Message:</b></p><p>${message}</p>`,
       reply_to: email,
