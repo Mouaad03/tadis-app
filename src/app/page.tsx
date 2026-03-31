@@ -493,7 +493,7 @@ export default function LandingPage() {
             </div>
             <button onClick={() => router.push('/auth?mode=login')} style={{ padding: '8px 16px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Syne', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>{c.login}</button>
             <button onClick={() => router.push('/auth?mode=register')} style={{ padding: '9px 20px', background: 'linear-gradient(135deg, #00ff88, #00ccaa)', border: 'none', borderRadius: '8px', color: '#000000', fontFamily: 'Syne', fontWeight: 800, fontSize: '13px', cursor: 'pointer' }}>Get Started</button>
-          </div>
+          </div>}
 
           {/* Mobile right — lang + hamburger */}
           <div className="show-mobile" style={{ alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
