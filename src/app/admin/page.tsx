@@ -29,19 +29,6 @@ export default function AdminPanel() {
     if (data) setAllCustomers(data)
   }
 
-async function markRead(msg: any) {
-    const { createClient } = await import('@/lib/supabase')
-    const supabase = createClient()
-    const table = msg.type === 'support' ? 'support_tickets' : 'contact_messages'
-    if (!msg.read_at) {
-      await supabase.from(table).update({ read_at: new Date().toISOString() }).eq('id', msg.id)
-      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read_at: new Date().toISOString() } : m))
-      setUnread(prev => Math.max(0, prev - 1))
-    }
-    setSelectedMsg({ ...msg, read_at: msg.read_at || new Date().toISOString() })
-    setReplyText('')
-  }
-
 async function searchCustomer() {
     if (!search) return
     setLoading(true)
