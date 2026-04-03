@@ -13,7 +13,7 @@ export default function UpgradePage() {
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const res = await fetch('/api/lemonsqueezy/checkout', {
+      const res = await fetch('/api/paddle/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user?.id, email: user?.email })
