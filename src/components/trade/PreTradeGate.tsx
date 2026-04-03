@@ -506,13 +506,13 @@ export default function PreTradeGate({ profile, todayTrades, onTradeAdded }: Pro
             // Revenge trade risk
             const lastLoss = todayTrades.find(t => t.result === 'loss')
             if (lastLoss && Date.now() - new Date(lastLoss.created_at).getTime() < 1800000) {
-              alerts.push({ type: 'danger', msg: `🔴 Loss detected — risk dyal revenge trade! Sber dik chwiya.` })
+              alerts.push({ type: 'danger', msg: `🔴 Loss detected — revenge trade risk! Take a break before your next trade.` })
             }
 
             // Daily loss limit
             const todayPnL = todayTrades.reduce((s, t) => s + (t.pnl || 0), 0)
             if (profile?.account_balance && todayPnL < -(profile.account_balance * 0.03)) {
-              alerts.push({ type: 'danger', msg: `🚨 Daily loss limit — khsart ${Math.abs(todayPnL).toFixed(0)}$ (3%+ dyal balance)` })
+              alerts.push({ type: 'danger', msg: `🚨 Daily loss limit reached — you're down $${Math.abs(todayPnL).toFixed(0)} (3%+ of balance). Stop trading for today.` })
             }
 
             if (alerts.length === 0) return null
