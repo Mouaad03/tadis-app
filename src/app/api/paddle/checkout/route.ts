@@ -2,22 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const { user_id, email } = await req.json()
-  
   const priceId = process.env.PADDLE_PRICE_ID
   const apiKey = process.env.PADDLE_API_KEY
 
-  // Use price-based checkout URL directly
-  const res = await fetch(`https://api.paddle.com/prices/${priceId}`, {
+  const res = await fetch('https://api.paddle.com/transactions', {
+    method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      items: [{ price_id: priceId, quantity: 1 }],
+      customer: { email },
+      custom_data: { user_id },
+    }),
   })
 
   const data = await res.json()
-  console.log('Price data:', JSON.stringify(data))
-
-  // Return direct checkout URL
-  const checkoutUrl = `https://checkout.paddle.com/checkout/custom/connect?product=${priceId}&email=${encodeURIComponent(email || '')}&passthrough=${encodeURIComponent(JSON.stringify({ user_id }))}`
+  console.log('Paddle:', JSON.stringify(data))
   
+  const checkoutUrl = data?.data?.checkout?.url
+  if (!checkoutUrl) {
+    return NextResponse.json({ error: 'Failed', details: data }, { status: 500 })
+  }
   return NextResponse.json({ url: checkoutUrl })
 }
