@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
   const data = await res.json()
   console.log('Paddle response:', JSON.stringify(data))
   
+  console.log('Full data:', JSON.stringify(data?.data))
   const checkoutUrl = data?.data?.checkout?.url
   if (!checkoutUrl) {
     return NextResponse.json({ error: 'Failed to create checkout', details: data }, { status: 500 })
