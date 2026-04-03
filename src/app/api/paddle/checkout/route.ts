@@ -6,30 +6,18 @@ export async function POST(req: NextRequest) {
   const priceId = process.env.PADDLE_PRICE_ID
   const apiKey = process.env.PADDLE_API_KEY
 
-  const res = await fetch('https://api.paddle.com/transactions', {
-    method: 'POST',
+  // Use price-based checkout URL directly
+  const res = await fetch(`https://api.paddle.com/prices/${priceId}`, {
     headers: {
       'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      items: [{ price_id: priceId, quantity: 1 }],
-      customer: { email },
-      custom_data: { user_id },
-      checkout: {
-        url: 'https://tradis.live/upgrade'
-      }
-    }),
   })
 
   const data = await res.json()
-  console.log('Paddle response:', JSON.stringify(data))
-  
-  console.log('Full data:', JSON.stringify(data?.data))
-  const checkoutUrl = data?.data?.checkout?.url
-  if (!checkoutUrl) {
-    return NextResponse.json({ error: 'Failed to create checkout', details: data }, { status: 500 })
-  }
+  console.log('Price data:', JSON.stringify(data))
+
+  // Return direct checkout URL
+  const checkoutUrl = `https://checkout.paddle.com/checkout/custom/connect?product=${priceId}&email=${encodeURIComponent(email || '')}&passthrough=${encodeURIComponent(JSON.stringify({ user_id }))}`
   
   return NextResponse.json({ url: checkoutUrl })
 }
