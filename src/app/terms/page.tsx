@@ -31,16 +31,16 @@ export default function TermsPage() {
           </div>
 
           {[
-            ['1. Acceptance of Terms', 'By accessing and using TRADIS, you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our service.'],
-            ['2. Service Description', 'TRADIS is a trading discipline system that provides pre-trade checklists, trade journaling, performance analytics, and AI-powered coaching reports. TRADIS does not provide financial advice, investment recommendations, or brokerage services.'],
+            ['1. Acceptance of Terms', 'By accessing and using TRADIS (operated under the business name TRADIS), you accept and agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our service.'],
+            ['2. Service Description', 'TRADIS (tradis.live) is a trading discipline system that provides pre-trade checklists, trade journaling, performance analytics, and AI-powered coaching reports. TRADIS does not provide financial advice, investment recommendations, or brokerage services.'],
             ['3. Not Financial Advice', 'All content, features, and AI-generated reports provided by TRADIS are for educational and informational purposes only. Nothing on TRADIS constitutes financial, investment, or trading advice. Always do your own research and consult a qualified financial advisor.'],
             ['4. Subscription & Billing', 'TRADIS offers a 15-day free trial with full access to all features. After the trial period, a Pro subscription of $9/month is required to continue using the service. You may cancel at any time before the trial ends without being charged.'],
             ['5. User Responsibilities', 'You are responsible for maintaining the confidentiality of your account credentials. You agree not to share your account, use the service for any illegal purpose, or attempt to reverse engineer or copy the TRADIS platform.'],
             ['6. Intellectual Property', 'All content, features, and functionality of TRADIS are owned by TRADIS and are protected by copyright, trademark, and other intellectual property laws.'],
             ['7. Limitation of Liability', 'TRADIS shall not be liable for any trading losses, lost profits, or any indirect, incidental, or consequential damages arising from your use of the service. TRADIS is a discipline tool only.'],
-            ['8. Termination', 'We reserve the right to suspend or terminate accounts that violate these terms. You may close your account at any time by contacting support@tradis.app.'],
+            ['8. Termination', 'We reserve the right to suspend or terminate accounts that violate these terms. You may close your account at any time by contacting support@tradis.live.'],
             ['9. Governing Law', 'These terms are governed by applicable law. Any disputes will be resolved through binding arbitration.'],
-            ['10. Contact', 'For questions about these Terms, contact us at support@tradis.app.'],
+            ['10. Contact', 'For questions about these Terms, contact us at support@tradis.live.'],
           ].map(([t, c]) => section(t as string, c as string))}
         </div>
       </div>
