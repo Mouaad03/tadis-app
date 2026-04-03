@@ -1,11 +1,23 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function UpgradePage() {
   const router = useRouter()
   const [hover, setHover] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
+    script.async = true
+    script.onload = () => {
+      ;(window as any).Paddle.Initialize({ 
+        token: 'live_6c9e5c86ef98abe08ecd832ab2e'
+      })
+    }
+    document.head.appendChild(script)
+  }, [])
 
   async function handleUpgrade() {
     setLoading(true)
@@ -13,14 +25,15 @@ export default function UpgradePage() {
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const res = await fetch('/api/paddle/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user?.id, email: user?.email })
+      
+      ;(window as any).Paddle.Checkout.open({
+        items: [{ priceId: 'pri_01kna272vbdqzg61hrsz4amr4r', quantity: 1 }],
+        customer: { email: user?.email },
+        customData: { user_id: user?.id },
+        settings: {
+          successUrl: 'https://tradis.live/dashboard?upgraded=true',
+        }
       })
-      const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else alert('Error: ' + (data.error || 'Unknown'))
     } catch(e: any) {
       alert('Error: ' + e.message)
     }
