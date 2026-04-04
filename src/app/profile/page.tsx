@@ -9,8 +9,10 @@ export default function ProfilePage() {
   const [tab, setTab] = useState<Tab>('info')
 
   const handlePaddlePortal = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
     try {
-      const res = await fetch('/api/paddle/portal', { method: 'POST' })
+      const res = await fetch('/api/paddle/portal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) })
       const data = await res.json()
       if (data.url) {
         window.open(data.url, '_blank')
