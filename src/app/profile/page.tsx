@@ -202,18 +202,18 @@ export default function ProfilePage() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button
-                  onClick={() => window.open('https://app.lemonsqueezy.com/my-orders', '_blank')}
+                  onClick={() => window.open('https://customer.paddle.com/', '_blank')}
                   style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
                   📋 View Payment History & Invoices
                 </button>
                 <button
-                  onClick={() => window.open('https://app.lemonsqueezy.com/my-orders', '_blank')}
+                  onClick={() => window.open('https://customer.paddle.com/', '_blank')}
                   style={{ padding: '12px 20px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
                   💳 Manage Payment Method
                 </button>
                 {profile?.is_pro && (
                   <button
-                    onClick={() => window.open('https://app.lemonsqueezy.com/my-orders', '_blank')}
+                    onClick={() => window.open('https://customer.paddle.com/', '_blank')}
                     style={{ padding: '12px 20px', background: 'rgba(255,68,102,0.06)', border: '1px solid rgba(255,68,102,0.2)', borderRadius: 10, color: '#ff4466', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
                     ❌ Cancel Subscription
                   </button>
