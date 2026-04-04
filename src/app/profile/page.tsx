@@ -1,11 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 type Tab = 'info' | 'security' | 'payment' | 'subscription' | 'support'
 
 export default function ProfilePage() {
   const router = useRouter()
+  const supabase = createClient()
   const [tab, setTab] = useState<Tab>('info')
 
   const handlePaddlePortal = async () => {
