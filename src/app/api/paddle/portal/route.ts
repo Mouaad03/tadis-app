@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
     .eq('id', user.id)
     .single()
 
+  console.log('Profile:', profile)
+
   if (!profile?.paddle_customer_id) {
     return NextResponse.json({ error: 'No Paddle customer found' }, { status: 404 })
   }
@@ -30,9 +32,11 @@ export async function POST(req: NextRequest) {
   )
 
   const data = await response.json()
+  console.log('Paddle response:', JSON.stringify(data))
+
   const portalUrl = data?.data?.urls?.general?.overview
 
-  if (!portalUrl) return NextResponse.json({ error: 'Failed to generate portal URL' }, { status: 500 })
+  if (!portalUrl) return NextResponse.json({ error: 'Failed to generate portal URL', paddle: data }, { status: 500 })
 
   return NextResponse.json({ url: portalUrl })
 }
