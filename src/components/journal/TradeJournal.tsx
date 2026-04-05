@@ -102,8 +102,9 @@ export default function TradeJournal({ userId, profile, demoTrades }: Props) {
     if (!userId) return
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
-    const m = String(mo + 1).padStart(2, '0')
-    const { data: ts } = await supabase.from('trades').select('date,pnl,result').eq('user_id', userId).gte('date', `${yr}-${m}-01`).lte('date', `${yr}-${m}-31`)
+    const curYr = date.getFullYear()
+    const curM = String(date.getMonth() + 1).padStart(2, '0')
+    const { data: ts } = await supabase.from('trades').select('date,pnl,result').eq('user_id', userId).gte('date', `${curYr}-${curM}-01`).lte('date', `${curYr}-${curM}-31`)
     const m2: Record<string, DayInfo> = {}
     ;(ts || []).forEach((t: any) => {
       if (!m2[t.date]) m2[t.date] = { pnl: 0, trades: 0 }
