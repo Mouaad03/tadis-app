@@ -23,10 +23,13 @@ export default function AdminPanel() {
   }, [authed])
 
   async function loadAllCustomers() {
-    const { createClient } = await import('@/lib/supabase')
-    const supabase = createClient()
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
-    if (data) setAllCustomers(data)
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: ADMIN_PASSWORD })
+    })
+    const data = await res.json()
+    if (data.users) setAllCustomers(data.users)
   }
 
 async function searchCustomer() {
@@ -36,17 +39,16 @@ async function searchCustomer() {
     setTrades([])
     setTickets([])
     setActionMsg('')
-    const { createClient } = await import('@/lib/supabase')
-    const supabase = createClient()
-    const { data: p } = await supabase.from('profiles').select('*')
-      .or(`customer_id.eq.${search},email.eq.${search}`)
-      .single()
-    if (p) {
-      setCustomer(p)
-      const { data: t } = await supabase.from('trades').select('*').eq('user_id', p.id).order('created_at', { ascending: false }).limit(20)
-      const { data: tk } = await supabase.from('support_tickets').select('*').eq('user_id', p.id).order('created_at', { ascending: false })
-      setTrades(t || [])
-      setTickets(tk || [])
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: ADMIN_PASSWORD, search })
+    })
+    const data = await res.json()
+    if (data.profile) {
+      setCustomer(data.profile)
+      setTrades(data.trades || [])
+      setTickets(data.tickets || [])
     } else {
       setError('Customer not found')
       setTimeout(() => setError(''), 3000)
