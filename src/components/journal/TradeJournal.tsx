@@ -103,8 +103,11 @@ export default function TradeJournal({ userId, profile, demoTrades }: Props) {
     const { createClient } = await import('@/lib/supabase')
     const supabase = createClient()
     const curYr = date.getFullYear()
-    const curM = String(date.getMonth() + 1).padStart(2, '0')
-    const { data: ts } = await supabase.from('trades').select('date,pnl,result').eq('user_id', userId).gte('date', `${curYr}-${curM}-01`).lte('date', `${curYr}-${curM}-31`)
+    const curMo = date.getMonth()
+    const curM = String(curMo + 1).padStart(2, '0')
+    const lastDay = new Date(curYr, curMo + 1, 0).getDate()
+    const curLastDay = String(lastDay).padStart(2, '0')
+    const { data: ts } = await supabase.from('trades').select('date,pnl,result').eq('user_id', userId).gte('date', `${curYr}-${curM}-01`).lte('date', `${curYr}-${curM}-${curLastDay}`)
     console.log('loadMonth query:', `${curYr}-${curM}-01`, 'to', `${curYr}-${curM}-31`)
     console.log('loadMonth results:', ts)
     const m2: Record<string, DayInfo> = {}
