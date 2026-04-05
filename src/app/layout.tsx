@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './nav.css'
 import Script from 'next/script'
 import CookieBanner from '@/components/ui/CookieBanner'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: "TRADIS — Trading Discipline System",
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ margin: 0, padding: 0, background: '#0a0a0f' }}>
         {children}
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   )
