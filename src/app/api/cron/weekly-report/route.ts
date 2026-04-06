@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const supabase = createClient()
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const { data: profiles } = await supabase.from('profiles').select('id, email, full_name, lang, risk_percent')
+  console.log('Profiles found:', profiles?.length)
   if (!profiles?.length) return NextResponse.json({ ok: true, generated: 0 })
   const today = new Date()
   const sunday = new Date(today)
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
       const { data: existing } = await supabase.from('weekly_reports').select('id').eq('user_id', profile.id).eq('period_start', periodStart).single()
       if (existing) continue
       const { data: trades } = await supabase.from('trades').select('*').eq('user_id', profile.id).gte('date', periodStart).lte('date', periodEnd)
+      console.log('Trades for user', profile.id, ':', trades?.length, 'period:', periodStart, '-', periodEnd)
       if (!trades?.length) continue
       const wins = trades.filter(t => t.result === 'win').length
       const losses = trades.filter(t => t.result === 'loss').length
