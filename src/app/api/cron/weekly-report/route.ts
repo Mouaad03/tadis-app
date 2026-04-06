@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
   }
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string)
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const { data: profiles } = await supabase.from('profiles').select('id, email, full_name, lang, risk_percent')
-  console.log('Profiles found:', profiles?.length)
+  const { data: profiles, error: profilesError } = await supabase.from('profiles').select('id, email, full_name, lang, risk_percent')
+  console.log('Profiles found:', profiles?.length, 'Error:', profilesError)
   if (!profiles?.length) return NextResponse.json({ ok: true, generated: 0 })
   const today = new Date()
   const sunday = new Date(today)
