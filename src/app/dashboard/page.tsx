@@ -9,7 +9,7 @@ import WeeklyReport from '@/components/dashboard/WeeklyReport'
 import LangSwitcher from '@/components/ui/LangSwitcher'
 import NotificationBell, { checkDisciplineAlerts, showUpdateNotif } from '@/components/ui/NotificationSystem'
 import { getLang, t, Lang } from '@/lib/i18n'
-import TrialBanner from '@/components/ui/TrialBanner'
+import TrialBanner, { getTrialInfo } from '@/components/ui/TrialBanner'
 import OnboardingFlow from '@/components/ui/OnboardingFlow'
 import { Trade, Profile } from '@/types'
 
@@ -207,6 +207,20 @@ function DashboardContent() {
       </div>
       <div style={{ padding: '8px 24px 0' }}>
         <TrialBanner trialStartDate={profile?.trial_start_date || null} isPro={profile?.is_pro || false} />
+        {(() => {
+          const { isExpired } = getTrialInfo(profile?.trial_start_date || null, profile?.is_pro || false)
+          if (!isExpired) return null
+          return (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 24 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', fontFamily: 'Syne,sans-serif', marginBottom: 8 }}>Trial Expired</div>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 32 }}>Upgrade to Pro to continue using TRADIS</div>
+                <button onClick={() => window.location.href='/upgrade'} style={{ padding: '14px 32px', background: 'linear-gradient(135deg,#00ff88,#00ccaa)', border: 'none', borderRadius: 10, color: '#000', fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>Upgrade — $9/month</button>
+              </div>
+            </div>
+          )
+        })()}
       </div>
       <div style={{ display: 'flex', background: bgTabs, borderBottom: `1px solid ${border2}` }}>
         {(['pre-trade', 'journal', 'weekly'] as Tab[]).map(tb => (
